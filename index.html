@@ -90,7 +90,6 @@
   .add-form input::placeholder { color: var(--muted); }
   .add-btn { width: 100%; padding: 9px; font-size: 13px; font-weight: 600; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s; }
   .add-btn:hover { opacity: 0.85; }
-  .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .err { font-size: 12px; color: var(--danger); display: none; margin-top: -4px; }
   .err.show { display: block; }
   .award-list { display: flex; flex-direction: column; gap: 6px; }
@@ -166,7 +165,7 @@
       <div class="add-form">
         <input type="text" id="nameInput" placeholder="Player name" maxlength="25" />
         <div class="err" id="addErr"></div>
-        <button class="add-btn" id="addBtn" onclick="addPlayer()">+ Add to league</button>
+        <button class="add-btn" onclick="addPlayer()">+ Add to league</button>
       </div>
     </div>
     <div class="divider"></div>
@@ -213,243 +212,241 @@
 <div class="confetti-wrap" id="confettiWrap"></div>
 
 <script>
-const ADMIN_PASSWORD = 'academy2026';
-const BIN_ID = '6acf3cd0ffd5d1605369c42f';
-const API_KEY = '$2a$10$rdQV8gJf/Vr61j6iwDw1UefInYpuA3.GTHgPYq8nShbjHm4//rdra';
-const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
-const HEADERS = { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY };
+  const ADMIN_PASSWORD = 'academy2026';
+  const SUPABASE_URL = 'https://xetlpfwgnxphrlddqhzs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhldGxwZndnbnhwaHJsZGRxaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NjA5NTMsImV4cCI6MjEwNzUzNjk1M30.iSUVfQoC6JyMyEqjV-N3Cd6_ADkeZMJHR7cSVjb7Hj0';
+  const API = `${SUPABASE_URL}/rest/v1/players`;
+  const HEADERS = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Prefer': 'return=representation'
+  };
 
-const AVATAR_COLORS = [
-  ['#3b2f6e','#a992fc'],['#1e4a3d','#4cd9a0'],['#4a1e2e','#f285a8'],
-  ['#2e2a12','#f5c842'],['#1a2e4a','#6ab0f5'],['#3a1e14','#f59a6a'],
-  ['#1a3a2a','#6af0b0'],['#3a2a1a','#f5b86a'],
-];
+  const AVATAR_COLORS = [
+    ['#3b2f6e','#a992fc'],['#1e4a3d','#4cd9a0'],['#4a1e2e','#f285a8'],
+    ['#2e2a12','#f5c842'],['#1a2e4a','#6ab0f5'],['#3a1e14','#f59a6a'],
+    ['#1a3a2a','#6af0b0'],['#3a2a1a','#f5b86a'],
+  ];
 
-let players = [];
-let isAdmin = false;
-let pendingAward = null;
-let pollInterval = null;
-let isSaving = false;
+  let players = [];
+  let isAdmin = false;
+  let pendingAward = null;
+  let pollInterval = null;
 
-function setSyncStatus(state, msg) {
-  const dot = document.getElementById('syncDot');
-  const label = document.getElementById('syncMsg');
-  dot.className = 'sync-dot ' + state;
-  label.textContent = msg;
-}
+  function setSyncStatus(state, msg) {
+    document.getElementById('syncDot').className = 'sync-dot ' + state;
+    document.getElementById('syncMsg').textContent = msg;
+  }
 
-async function loadFromBin(force) {
-  if (isSaving && !force) return;
-  try {
-    const res = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
-    if (!res.ok) throw new Error('fetch failed');
-    const data = await res.json();
-    const fresh = data.record;
-    if (Array.isArray(fresh)) {
-      players = fresh.map(p => ({ ...p, score: parseInt(p.score) || 0 }));
-    } else if (fresh && Array.isArray(fresh.players)) {
-      players = fresh.players.map(p => ({ ...p, score: parseInt(p.score) || 0 }));
+  async function loadPlayers() {
+    try {
+      const res = await fetch(API + '?order=score.desc', { headers: HEADERS });
+      if (!res.ok) throw new Error();
+      players = await res.json();
+      setSyncStatus('ok', 'Live — synced just now');
+      render();
+    } catch(e) {
+      setSyncStatus('err', 'Connection error — retrying...');
     }
-    setSyncStatus('ok', 'Live — synced just now');
+  }
+
+  async function addPlayer() {
+    const inp = document.getElementById('nameInput');
+    const err = document.getElementById('addErr');
+    const name = inp.value.trim();
+    if (!name) { err.textContent = 'Enter a name first.'; err.classList.add('show'); return; }
+    if (players.find(p => p.name.toLowerCase() === name.toLowerCase())) { err.textContent = 'That name already exists.'; err.classList.add('show'); return; }
+    err.classList.remove('show');
+    setSyncStatus('loading', 'Saving...');
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify({ name, score: 0 })
+      });
+      if (!res.ok) throw new Error();
+      inp.value = '';
+      await loadPlayers();
+    } catch(e) {
+      setSyncStatus('err', 'Save failed — try again');
+    }
+  }
+
+  async function changeScore(id, delta) {
+    const p = players.find(p => p.id === id);
+    if (!p) return;
+    const newScore = Math.max(0, p.score + delta);
+    p.score = newScore;
+    render(id);
+    if (delta > 0) confetti();
+    setSyncStatus('loading', 'Saving...');
+    try {
+      const res = await fetch(`${API}?id=eq.${id}`, {
+        method: 'PATCH',
+        headers: HEADERS,
+        body: JSON.stringify({ score: newScore })
+      });
+      if (!res.ok) throw new Error();
+      setSyncStatus('ok', 'Live — synced just now');
+    } catch(e) {
+      setSyncStatus('err', 'Save failed — try again');
+      await loadPlayers();
+    }
+  }
+
+  async function deletePlayer(id, name) {
+    if (!confirm(`Remove "${name}" from the league?`)) return;
+    setSyncStatus('loading', 'Saving...');
+    try {
+      const res = await fetch(`${API}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+      if (!res.ok) throw new Error();
+      await loadPlayers();
+    } catch(e) {
+      setSyncStatus('err', 'Delete failed — try again');
+    }
+  }
+
+  function sorted() { return [...players].sort((a,b) => b.score - a.score); }
+
+  function initials(name) { return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function render(bumpId) {
+    const s = sorted();
+    renderPodium(s);
+    renderList(s, bumpId);
+  }
+
+  function renderPodium(s) {
+    const pod = document.getElementById('podium');
+    if (!s.length) { pod.innerHTML = ''; return; }
+    const slots = [
+      { idx:0, cls:'first', rank:'1', crown:'👑' },
+      { idx:1, cls:'second', rank:'2', crown:null },
+      { idx:2, cls:'third', rank:'3', crown:null },
+    ].filter(sl => s[sl.idx]);
+    pod.innerHTML = slots.map(sl => {
+      const p = s[sl.idx];
+      const ci = players.findIndex(x => x.id === p.id);
+      const [bg, fg] = AVATAR_COLORS[Math.abs(ci) % AVATAR_COLORS.length];
+      return `<div class="podium-slot ${sl.cls}">
+        <div class="pod-avatar" style="background:${bg};color:${fg}">
+          ${sl.crown ? `<span class="pod-crown">${sl.crown}</span>` : ''}
+          ${initials(p.name)}
+        </div>
+        <div class="pod-name">${esc(p.name)}</div>
+        <div class="pod-score">${p.score} 🍪</div>
+        <div class="pod-block">${sl.rank}</div>
+      </div>`;
+    }).join('');
+  }
+
+  function renderList(s, bumpId) {
+    const list = document.getElementById('playerList');
+    if (!s.length) {
+      list.innerHTML = '<div class="empty-state"><div class="big">🍪</div>No players yet.<br>Ask your admin to add the team!</div>';
+      return;
+    }
+    const rest = s.slice(3);
+    if (!rest.length) { list.innerHTML = ''; return; }
+    const max = Math.max(...players.map(p => p.score), 1);
+    list.innerHTML = rest.map((p, i) => {
+      const ci = players.findIndex(x => x.id === p.id);
+      const [bg, fg] = AVATAR_COLORS[Math.abs(ci) % AVATAR_COLORS.length];
+      const pct = Math.round((p.score / max) * 100);
+      const controls = isAdmin ? `<div class="row-controls">
+        <button class="ctrl-btn minus" onclick="changeScore(${p.id},-1)">−</button>
+        <button class="ctrl-btn plus" onclick="changeScore(${p.id},1)">+</button>
+        <button class="ctrl-btn del" onclick="deletePlayer(${p.id},'${esc(p.name).replace(/'/g,"\\'")}')">✕</button>
+      </div>` : '';
+      return `<div class="player-row${p.id===bumpId?' bump':''}" data-id="${p.id}">
+        <div class="row-rank">${i + 4}</div>
+        <div class="row-avatar" style="background:${bg};color:${fg}">${initials(p.name)}</div>
+        <div class="row-info">
+          <div class="row-name">${esc(p.name)}</div>
+          <div class="row-bar-wrap"><div class="row-bar" style="width:${pct}%"></div></div>
+        </div>
+        <div class="row-score">🍪 ${p.score}</div>
+        ${controls}
+      </div>`;
+    }).join('');
+  }
+
+  function openAward(label, pts) {
+    if (!players.length) { alert('Add players first!'); return; }
+    pendingAward = pts;
+    document.getElementById('awardTitle').textContent = label;
+    document.getElementById('awardBody').textContent = `Who gets ${pts} 🍪?`;
+    document.getElementById('awardPlayerList').innerHTML = sorted().map(p =>
+      `<button class="award-player-btn" onclick="giveAward(${p.id})">${esc(p.name)} · 🍪 ${p.score}</button>`
+    ).join('');
+    document.getElementById('awardOverlay').classList.add('open');
+  }
+
+  async function giveAward(id) {
+    closeAward();
+    await changeScore(id, pendingAward);
+  }
+
+  function closeAward() { document.getElementById('awardOverlay').classList.remove('open'); pendingAward = null; }
+
+  function handleAdminToggle() {
+    if (isAdmin) { lockAdmin(); return; }
+    document.getElementById('pwInput').value = '';
+    document.getElementById('lockErr').textContent = '';
+    document.getElementById('lockOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('pwInput').focus(), 50);
+  }
+
+  function tryUnlock() {
+    if (document.getElementById('pwInput').value === ADMIN_PASSWORD) {
+      isAdmin = true;
+      closeLock();
+      document.getElementById('adminPanel').classList.remove('hidden');
+      document.getElementById('adminToggleBtn').classList.add('active');
+      document.getElementById('lockIcon').textContent = '🔓';
+      document.getElementById('adminBtnLabel').textContent = 'Admin on';
+      render();
+    } else {
+      document.getElementById('lockErr').textContent = 'Wrong password.';
+      document.getElementById('pwInput').select();
+    }
+  }
+
+  function lockAdmin() {
+    isAdmin = false;
+    document.getElementById('adminPanel').classList.add('hidden');
+    document.getElementById('adminToggleBtn').classList.remove('active');
+    document.getElementById('lockIcon').textContent = '🔒';
+    document.getElementById('adminBtnLabel').textContent = 'Admin';
     render();
-  } catch(e) {
-    setSyncStatus('err', 'Connection error — retrying...');
   }
-}
 
-async function saveToBin() {
-  isSaving = true;
-  setSyncStatus('loading', 'Saving...');
-  const snapshot = JSON.stringify(players);
-  try {
-    const res = await fetch(BIN_URL, {
-      method: 'PUT',
-      headers: HEADERS,
-      body: snapshot
-    });
-    if (!res.ok) throw new Error('save failed');
-    setSyncStatus('ok', 'Live — synced just now');
-  } catch(e) {
-    setSyncStatus('err', 'Save failed — try again');
+  function closeLock() { document.getElementById('lockOverlay').classList.remove('open'); }
+
+  function confetti() {
+    const wrap = document.getElementById('confettiWrap');
+    const colors = ['#7c5cfc','#f5c842','#3ecf8e','#f26b6b','#6ab0f5','#f5b86a'];
+    for (let i = 0; i < 22; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetto';
+      const size = 5 + Math.random() * 7;
+      el.style.cssText = `left:${Math.random()*100}%;top:-12px;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${0.8+Math.random()*0.9}s;animation-delay:${Math.random()*0.25}s;`;
+      wrap.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
   }
-  isSaving = false;
-}
 
-function startPolling() {
-  if (pollInterval) clearInterval(pollInterval);
-  pollInterval = setInterval(() => loadFromBin(false), 15000);
-}
+  document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') tryUnlock(); });
+  document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key==='Enter') addPlayer(); });
+  document.getElementById('nameInput').addEventListener('input', () => document.getElementById('addErr').classList.remove('show'));
+  document.getElementById('lockOverlay').addEventListener('click', e => { if(e.target===document.getElementById('lockOverlay')) closeLock(); });
+  document.getElementById('awardOverlay').addEventListener('click', e => { if(e.target===document.getElementById('awardOverlay')) closeAward(); });
 
-function sorted() { return [...players].sort((a,b) => b.score - a.score); }
-
-function initials(name) { return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
-
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function render(bumpId) {
-  const s = sorted();
-  renderPodium(s);
-  renderList(s, bumpId);
-}
-
-function renderPodium(s) {
-  const pod = document.getElementById('podium');
-  if (!s.length) { pod.innerHTML = ''; return; }
-  const slots = [
-    { idx:0, cls:'first', rank:'1', crown:'👑' },
-    { idx:1, cls:'second', rank:'2', crown:null },
-    { idx:2, cls:'third', rank:'3', crown:null },
-  ].filter(sl => s[sl.idx]);
-  pod.innerHTML = slots.map(sl => {
-    const p = s[sl.idx];
-    const ci = players.findIndex(x => x.id === p.id);
-    const [bg, fg] = AVATAR_COLORS[Math.abs(ci) % AVATAR_COLORS.length];
-    return `<div class="podium-slot ${sl.cls}">
-      <div class="pod-avatar" style="background:${bg};color:${fg}">
-        ${sl.crown ? `<span class="pod-crown">${sl.crown}</span>` : ''}
-        ${initials(p.name)}
-      </div>
-      <div class="pod-name">${esc(p.name)}</div>
-      <div class="pod-score">${p.score} 🍪</div>
-      <div class="pod-block">${sl.rank}</div>
-    </div>`;
-  }).join('');
-}
-
-function renderList(s, bumpId) {
-  const list = document.getElementById('playerList');
-  if (!s.length) {
-    list.innerHTML = '<div class="empty-state"><div class="big">🍪</div>No players yet.<br>Ask your admin to add the team!</div>';
-    return;
-  }
-  const rest = s.slice(3);
-  if (!rest.length) { list.innerHTML = ''; return; }
-  const max = Math.max(...players.map(p=>p.score), 1);
-  list.innerHTML = rest.map((p, i) => {
-    const rank = i + 4;
-    const ci = players.findIndex(x => x.id === p.id);
-    const [bg, fg] = AVATAR_COLORS[Math.abs(ci) % AVATAR_COLORS.length];
-    const pct = Math.round((p.score / max) * 100);
-    const controls = isAdmin ? `<div class="row-controls">
-      <button class="ctrl-btn minus" onclick="changeScore(${p.id},-1)">−</button>
-      <button class="ctrl-btn plus" onclick="changeScore(${p.id},1)">+</button>
-      <button class="ctrl-btn del" onclick="askDel(${p.id},'${esc(p.name).replace(/'/g,"\\'")}')">✕</button>
-    </div>` : '';
-    return `<div class="player-row${p.id===bumpId?' bump':''}" data-id="${p.id}">
-      <div class="row-rank">${rank}</div>
-      <div class="row-avatar" style="background:${bg};color:${fg}">${initials(p.name)}</div>
-      <div class="row-info">
-        <div class="row-name">${esc(p.name)}</div>
-        <div class="row-bar-wrap"><div class="row-bar" style="width:${pct}%"></div></div>
-      </div>
-      <div class="row-score">🍪 ${p.score}</div>
-      ${controls}
-    </div>`;
-  }).join('');
-}
-
-async function addPlayer() {
-  const inp = document.getElementById('nameInput');
-  const err = document.getElementById('addErr');
-  const name = inp.value.trim();
-  if (!name) { err.textContent='Enter a name first.'; err.classList.add('show'); return; }
-  if (players.find(p => p.name.toLowerCase()===name.toLowerCase())) { err.textContent='That name already exists.'; err.classList.add('show'); return; }
-  err.classList.remove('show');
-  players.push({ id: Date.now(), name, score: 0 });
-  inp.value = '';
-  render();
-  await saveToBin();
-}
-
-async function changeScore(id, delta) {
-  const p = players.find(p => p.id === id);
-  if (!p) return;
-  p.score = Math.max(0, (parseInt(p.score) || 0) + delta);
-  render(id);
-  if (delta > 0) confetti();
-  await saveToBin();
-}
-
-async function askDel(id, name) {
-  if (!confirm(`Remove "${name}" from the league?`)) return;
-  players = players.filter(p => p.id !== id);
-  render();
-  await saveToBin();
-}
-
-function openAward(label, pts) {
-  if (!players.length) { alert('Add players first!'); return; }
-  pendingAward = pts;
-  document.getElementById('awardTitle').textContent = label;
-  document.getElementById('awardBody').textContent = `Who gets ${pts} 🍪?`;
-  const list = document.getElementById('awardPlayerList');
-  list.innerHTML = sorted().map(p => `
-    <button class="award-player-btn" onclick="giveAward(${p.id})">${esc(p.name)} · 🍪 ${p.score}</button>`).join('');
-  document.getElementById('awardOverlay').classList.add('open');
-}
-
-async function giveAward(id) {
-  closeAward();
-  await changeScore(id, pendingAward);
-}
-
-function closeAward() { document.getElementById('awardOverlay').classList.remove('open'); pendingAward = null; }
-
-function handleAdminToggle() {
-  if (isAdmin) { lockAdmin(); return; }
-  document.getElementById('pwInput').value = '';
-  document.getElementById('lockErr').textContent = '';
-  document.getElementById('lockOverlay').classList.add('open');
-  setTimeout(() => document.getElementById('pwInput').focus(), 50);
-}
-
-function tryUnlock() {
-  if (document.getElementById('pwInput').value === ADMIN_PASSWORD) {
-    isAdmin = true;
-    closeLock();
-    document.getElementById('adminPanel').classList.remove('hidden');
-    document.getElementById('adminToggleBtn').classList.add('active');
-    document.getElementById('lockIcon').textContent = '🔓';
-    document.getElementById('adminBtnLabel').textContent = 'Admin on';
-    render();
-  } else {
-    document.getElementById('lockErr').textContent = 'Wrong password.';
-    document.getElementById('pwInput').select();
-  }
-}
-
-function lockAdmin() {
-  isAdmin = false;
-  document.getElementById('adminPanel').classList.add('hidden');
-  document.getElementById('adminToggleBtn').classList.remove('active');
-  document.getElementById('lockIcon').textContent = '🔒';
-  document.getElementById('adminBtnLabel').textContent = 'Admin';
-  render();
-}
-
-function closeLock() { document.getElementById('lockOverlay').classList.remove('open'); }
-
-function confetti() {
-  const wrap = document.getElementById('confettiWrap');
-  const colors = ['#7c5cfc','#f5c842','#3ecf8e','#f26b6b','#6ab0f5','#f5b86a'];
-  for (let i = 0; i < 22; i++) {
-    const el = document.createElement('div');
-    el.className = 'confetto';
-    const size = 5 + Math.random() * 7;
-    el.style.cssText = `left:${Math.random()*100}%;top:-12px;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${0.8+Math.random()*0.9}s;animation-delay:${Math.random()*0.25}s;`;
-    wrap.appendChild(el);
-    el.addEventListener('animationend', () => el.remove());
-  }
-}
-
-document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') tryUnlock(); });
-document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key==='Enter') addPlayer(); });
-document.getElementById('nameInput').addEventListener('input', () => document.getElementById('addErr').classList.remove('show'));
-document.getElementById('lockOverlay').addEventListener('click', e => { if(e.target===document.getElementById('lockOverlay')) closeLock(); });
-document.getElementById('awardOverlay').addEventListener('click', e => { if(e.target===document.getElementById('awardOverlay')) closeAward(); });
-
-loadFromBin();
-startPolling();
+  loadPlayers();
+  pollInterval = setInterval(loadPlayers, 10000);
 </script>
 </body>
 </html>
