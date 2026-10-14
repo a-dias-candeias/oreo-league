@@ -8,120 +8,61 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #0e0c14;
-    --surface: #18151f;
-    --card: #211e2a;
-    --border: rgba(255,255,255,0.08);
-    --border-strong: rgba(255,255,255,0.16);
-    --text: #f0edf8;
-    --muted: #7a748a;
-    --accent: #7c5cfc;
-    --accent-dim: rgba(124,92,252,0.15);
-    --accent-border: rgba(124,92,252,0.4);
-    --gold: #f5c842;
-    --silver: #b0aec0;
-    --bronze: #c97a3a;
-    --success: #3ecf8e;
-    --danger: #f26b6b;
-    --oreo: #1a1a1a;
+    --bg: #0e0c14; --surface: #18151f; --card: #211e2a;
+    --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.16);
+    --text: #f0edf8; --muted: #7a748a; --accent: #7c5cfc;
+    --accent-dim: rgba(124,92,252,0.15); --accent-border: rgba(124,92,252,0.4);
+    --gold: #f5c842; --silver: #b0aec0; --bronze: #c97a3a;
+    --success: #3ecf8e; --danger: #f26b6b;
   }
-
-  body {
-    font-family: 'Inter', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding: 0;
-  }
-
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
   h1, h2, .brand { font-family: 'Syne', sans-serif; }
 
-  /* ── Header ── */
-  .header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 20px 28px 16px;
-    border-bottom: 1px solid var(--border);
-  }
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 20px 28px 16px; border-bottom: 1px solid var(--border); }
   .brand-lock { display: flex; align-items: center; gap: 14px; }
   .brand { font-size: 22px; font-weight: 800; letter-spacing: -0.5px; color: var(--text); }
   .brand span { color: var(--accent); }
-  .session-badge {
-    font-size: 11px; font-weight: 500; letter-spacing: 0.04em;
-    background: var(--accent-dim); color: var(--accent);
-    border: 1px solid var(--accent-border);
-    border-radius: 999px; padding: 3px 10px;
-  }
-  .admin-btn {
-    display: flex; align-items: center; gap: 6px;
-    font-size: 12px; font-weight: 500; cursor: pointer;
-    color: var(--muted); background: none; border: 1px solid var(--border);
-    border-radius: 8px; padding: 6px 12px; transition: all 0.15s;
-  }
+  .session-badge { font-size: 11px; font-weight: 500; letter-spacing: 0.04em; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 999px; padding: 3px 10px; }
+  .admin-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; transition: all 0.15s; }
   .admin-btn:hover { color: var(--text); border-color: var(--border-strong); }
   .admin-btn.active { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
-  .lock-icon { font-size: 14px; }
 
-  /* ── Main layout ── */
-  .main { display: flex; gap: 0; min-height: calc(100vh - 65px); }
+  .sync-bar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 6px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); min-height: 30px; }
+  .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .sync-dot.ok { background: var(--success); }
+  .sync-dot.err { background: var(--danger); }
+  .sync-dot.loading { background: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* ── Leaderboard ── */
+  .main { display: flex; min-height: calc(100vh - 95px); }
   .lb-section { flex: 1; padding: 24px 28px; }
 
-  .podium {
-    display: flex; align-items: flex-end; justify-content: center;
-    gap: 12px; margin-bottom: 32px; padding: 0 12px;
-  }
-  .podium-slot {
-    display: flex; flex-direction: column; align-items: center; gap: 8px;
-    flex: 1; max-width: 140px;
-  }
+  .podium { display: flex; align-items: flex-end; justify-content: center; gap: 12px; margin-bottom: 32px; padding: 0 12px; }
+  .podium-slot { display: flex; flex-direction: column; align-items: center; gap: 8px; flex: 1; max-width: 140px; }
   .podium-slot.first { order: 2; }
   .podium-slot.second { order: 1; }
   .podium-slot.third { order: 3; }
-
-  .pod-avatar {
-    width: 52px; height: 52px; border-radius: 50%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px; font-weight: 700; font-family: 'Syne', sans-serif;
-    border: 2px solid transparent; position: relative;
-  }
+  .pod-avatar { width: 52px; height: 52px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 700; font-family: 'Syne', sans-serif; border: 2px solid transparent; position: relative; }
   .podium-slot.first .pod-avatar { width: 64px; height: 64px; border-color: var(--gold); }
   .podium-slot.second .pod-avatar { border-color: var(--silver); }
   .podium-slot.third .pod-avatar { border-color: var(--bronze); }
-
   .pod-crown { position: absolute; top: -14px; font-size: 18px; }
   .pod-name { font-size: 12px; font-weight: 500; text-align: center; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
   .pod-score { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
   .podium-slot.first .pod-score { font-size: 20px; color: var(--gold); }
   .podium-slot.second .pod-score { color: var(--silver); }
   .podium-slot.third .pod-score { color: var(--bronze); }
-
-  .pod-block {
-    width: 100%; border-radius: 10px 10px 0 0;
-    display: flex; align-items: center; justify-content: center;
-    font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800;
-  }
+  .pod-block { width: 100%; border-radius: 10px 10px 0 0; display: flex; align-items: center; justify-content: center; font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
   .podium-slot.first .pod-block { height: 72px; background: rgba(245,200,66,0.15); border: 1px solid rgba(245,200,66,0.3); color: var(--gold); }
   .podium-slot.second .pod-block { height: 52px; background: rgba(176,174,192,0.1); border: 1px solid rgba(176,174,192,0.2); color: var(--silver); }
   .podium-slot.third .pod-block { height: 40px; background: rgba(201,122,58,0.1); border: 1px solid rgba(201,122,58,0.2); color: var(--bronze); }
 
   .list-section { display: flex; flex-direction: column; gap: 6px; }
-
-  .player-row {
-    display: flex; align-items: center; gap: 12px;
-    background: var(--card); border: 1px solid var(--border);
-    border-radius: 12px; padding: 11px 14px;
-    transition: border-color 0.2s, transform 0.35s cubic-bezier(0.34,1.4,0.64,1);
-    position: relative;
-  }
+  .player-row { display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 11px 14px; transition: border-color 0.2s, transform 0.35s cubic-bezier(0.34,1.4,0.64,1); }
   .player-row:hover { border-color: var(--border-strong); }
   .player-row.bump { animation: bump 0.45s cubic-bezier(0.34,1.5,0.64,1); }
   @keyframes bump { 0%,100%{transform:scale(1)} 45%{transform:scale(1.025)} }
-
   .row-rank { font-size: 13px; font-weight: 600; min-width: 28px; text-align: center; color: var(--muted); font-family: 'Syne', sans-serif; }
   .row-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; font-family: 'Syne', sans-serif; flex-shrink: 0; }
   .row-info { flex: 1; min-width: 0; }
@@ -129,130 +70,67 @@
   .row-bar-wrap { margin-top: 4px; height: 3px; background: rgba(255,255,255,0.06); border-radius: 999px; overflow: hidden; }
   .row-bar { height: 100%; border-radius: 999px; background: var(--accent); transition: width 0.6s cubic-bezier(0.34,1.2,0.64,1); }
   .row-score { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-  .oreo-pip { font-size: 16px; }
-
   .row-controls { display: flex; align-items: center; gap: 5px; flex-shrink: 0; }
-  .ctrl-btn {
-    width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border);
-    background: none; color: var(--muted); font-size: 15px; cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    transition: all 0.15s; line-height: 1;
-  }
+  .ctrl-btn { width: 26px; height: 26px; border-radius: 50%; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 15px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; line-height: 1; }
   .ctrl-btn:hover.minus { background: rgba(242,107,107,0.15); color: var(--danger); border-color: rgba(242,107,107,0.4); }
   .ctrl-btn:hover.plus { background: rgba(62,207,142,0.15); color: var(--success); border-color: rgba(62,207,142,0.4); }
-  .ctrl-btn.del { font-size: 12px; opacity: 0; transition: opacity 0.15s; }
+  .ctrl-btn.del { font-size: 12px; opacity: 0; }
   .player-row:hover .ctrl-btn.del { opacity: 0.6; }
   .ctrl-btn.del:hover { opacity: 1 !important; background: rgba(242,107,107,0.15); color: var(--danger); border-color: rgba(242,107,107,0.4); }
 
-  .empty-state {
-    text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; line-height: 1.7;
-  }
+  .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; line-height: 1.7; }
   .empty-state .big { font-size: 36px; margin-bottom: 8px; }
 
-  /* ── Admin panel ── */
-  .admin-panel {
-    width: 280px; border-left: 1px solid var(--border);
-    padding: 24px 20px; display: flex; flex-direction: column; gap: 20px;
-    background: var(--surface);
-    transition: transform 0.25s ease, opacity 0.2s;
-  }
+  .admin-panel { width: 280px; border-left: 1px solid var(--border); padding: 24px 20px; display: flex; flex-direction: column; gap: 20px; background: var(--surface); }
   .admin-panel.hidden { display: none; }
-
   .panel-label { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; color: var(--muted); text-transform: uppercase; margin-bottom: 10px; }
-
   .add-form { display: flex; flex-direction: column; gap: 8px; }
-  .add-form input {
-    width: 100%; padding: 9px 12px; font-size: 13px; font-family: 'Inter', sans-serif;
-    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text); outline: none; transition: border-color 0.15s;
-  }
+  .add-form input { width: 100%; padding: 9px 12px; font-size: 13px; font-family: 'Inter', sans-serif; background: var(--card); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; transition: border-color 0.15s; }
   .add-form input:focus { border-color: var(--accent-border); }
   .add-form input::placeholder { color: var(--muted); }
-  .add-btn {
-    width: 100%; padding: 9px; font-size: 13px; font-weight: 600;
-    background: var(--accent); color: #fff; border: none; border-radius: 8px;
-    cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s;
-  }
+  .add-btn { width: 100%; padding: 9px; font-size: 13px; font-weight: 600; background: var(--accent); color: #fff; border: none; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s; }
   .add-btn:hover { opacity: 0.85; }
+  .add-btn:disabled { opacity: 0.5; cursor: not-allowed; }
   .err { font-size: 12px; color: var(--danger); display: none; margin-top: -4px; }
   .err.show { display: block; }
-
   .award-list { display: flex; flex-direction: column; gap: 6px; }
-  .award-chip {
-    display: flex; align-items: center; justify-content: space-between;
-    background: var(--card); border: 1px solid var(--border); border-radius: 8px;
-    padding: 9px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s;
-    font-size: 13px; color: var(--text);
-  }
+  .award-chip { display: flex; align-items: center; justify-content: space-between; background: var(--card); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; cursor: pointer; transition: border-color 0.15s, background 0.15s; font-size: 13px; color: var(--text); }
   .award-chip:hover { border-color: var(--border-strong); background: rgba(124,92,252,0.08); }
   .award-pts { font-family: 'Syne', sans-serif; font-size: 12px; font-weight: 700; color: var(--accent); }
-
   .divider { height: 1px; background: var(--border); }
 
-  /* ── Lock overlay ── */
-  .lock-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(14,12,20,0.85);
-    align-items: center; justify-content: center; z-index: 100;
-  }
+  .lock-overlay { display: none; position: fixed; inset: 0; background: rgba(14,12,20,0.85); align-items: center; justify-content: center; z-index: 100; }
   .lock-overlay.open { display: flex; }
-  .lock-box {
-    background: var(--card); border: 1px solid var(--border-strong);
-    border-radius: 16px; padding: 28px 24px; width: 320px; max-width: 90vw;
-  }
+  .lock-box { background: var(--card); border: 1px solid var(--border-strong); border-radius: 16px; padding: 28px 24px; width: 320px; max-width: 90vw; }
   .lock-box h2 { font-size: 18px; margin-bottom: 6px; }
   .lock-box p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
-  .lock-box input {
-    width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'Inter', sans-serif;
-    background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-    color: var(--text); outline: none; margin-bottom: 10px; letter-spacing: 0.1em;
-    transition: border-color 0.15s;
-  }
+  .lock-box input { width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; margin-bottom: 10px; letter-spacing: 0.1em; transition: border-color 0.15s; }
   .lock-box input:focus { border-color: var(--accent-border); }
   .lock-box .lock-err { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 10px; }
   .lock-actions { display: flex; gap: 8px; }
-  .lock-actions button {
-    flex: 1; padding: 10px; font-size: 13px; font-weight: 600;
-    border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; border: none;
-    transition: opacity 0.15s;
-  }
+  .lock-actions button { flex: 1; padding: 10px; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; border: none; transition: opacity 0.15s; }
   .lock-actions .cancel-btn { background: var(--border); color: var(--muted); }
   .lock-actions .unlock-btn { background: var(--accent); color: #fff; }
   .lock-actions button:hover { opacity: 0.85; }
 
-  /* ── Award modal ── */
-  .award-overlay {
-    display: none; position: fixed; inset: 0;
-    background: rgba(14,12,20,0.8);
-    align-items: center; justify-content: center; z-index: 100;
-  }
+  .award-overlay { display: none; position: fixed; inset: 0; background: rgba(14,12,20,0.8); align-items: center; justify-content: center; z-index: 100; }
   .award-overlay.open { display: flex; }
-  .award-box {
-    background: var(--card); border: 1px solid var(--border-strong);
-    border-radius: 16px; padding: 24px; width: 320px; max-width: 90vw;
-  }
+  .award-box { background: var(--card); border: 1px solid var(--border-strong); border-radius: 16px; padding: 24px; width: 320px; max-width: 90vw; }
   .award-box h2 { font-size: 16px; margin-bottom: 4px; }
   .award-box p { font-size: 13px; color: var(--muted); margin-bottom: 16px; }
   .award-player-list { display: flex; flex-direction: column; gap: 6px; max-height: 220px; overflow-y: auto; margin-bottom: 14px; }
-  .award-player-btn {
-    padding: 9px 12px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 8px; color: var(--text); font-size: 13px; cursor: pointer;
-    text-align: left; transition: all 0.15s; font-family: 'Inter', sans-serif;
-  }
+  .award-player-btn { padding: 9px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-size: 13px; cursor: pointer; text-align: left; transition: all 0.15s; font-family: 'Inter', sans-serif; }
   .award-player-btn:hover { background: var(--accent-dim); border-color: var(--accent-border); }
   .award-close { width: 100%; padding: 9px; background: none; border: 1px solid var(--border); border-radius: 8px; color: var(--muted); cursor: pointer; font-family: 'Inter', sans-serif; font-size: 13px; }
   .award-close:hover { color: var(--text); }
 
-  /* ── Confetti ── */
   .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
   .confetto { position: absolute; opacity: 0; animation: cffall linear forwards; border-radius: 2px; }
   @keyframes cffall { 0%{opacity:1;transform:translateY(-10px) rotate(0)} 100%{opacity:0;transform:translateY(100vh) rotate(540deg)} }
 
-  /* ── Responsive ── */
   @media (max-width: 640px) {
     .admin-panel { width: 100%; border-left: none; border-top: 1px solid var(--border); }
     .main { flex-direction: column; }
-    .podium { gap: 6px; }
     .header { padding: 14px 16px 12px; }
     .lb-section { padding: 16px; }
   }
@@ -266,10 +144,15 @@
     <div class="session-badge">AI Academy</div>
   </div>
   <button class="admin-btn" id="adminToggleBtn" onclick="handleAdminToggle()">
-    <span class="lock-icon" id="lockIcon">🔒</span>
+    <span id="lockIcon">🔒</span>
     <span id="adminBtnLabel">Admin</span>
   </button>
 </header>
+
+<div class="sync-bar">
+  <div class="sync-dot loading" id="syncDot"></div>
+  <span id="syncMsg">Connecting...</span>
+</div>
 
 <div class="main">
   <section class="lb-section" id="lbSection">
@@ -283,28 +166,18 @@
       <div class="add-form">
         <input type="text" id="nameInput" placeholder="Player name" maxlength="25" />
         <div class="err" id="addErr"></div>
-        <button class="add-btn" onclick="addPlayer()">+ Add to league</button>
+        <button class="add-btn" id="addBtn" onclick="addPlayer()">+ Add to league</button>
       </div>
     </div>
     <div class="divider"></div>
     <div>
       <div class="panel-label">Award cookies 🍪</div>
       <div class="award-list">
-        <div class="award-chip" onclick="openAward('Presented a demo', 2)">
-          <span>Presented a demo</span><span class="award-pts">+2 🍪</span>
-        </div>
-        <div class="award-chip" onclick="openAward('Won ice breaker', 1)">
-          <span>Won ice breaker</span><span class="award-pts">+1 🍪</span>
-        </div>
-        <div class="award-chip" onclick="openAward('Suggestion used', 1)">
-          <span>Suggestion used</span><span class="award-pts">+1 🍪</span>
-        </div>
-        <div class="award-chip" onclick="openAward('Async participation', 1)">
-          <span>Async participation</span><span class="award-pts">+1 🍪</span>
-        </div>
-        <div class="award-chip" onclick="openAward('Best question', 1)">
-          <span>Best question</span><span class="award-pts">+1 🍪</span>
-        </div>
+        <div class="award-chip" onclick="openAward('Presented a demo', 2)"><span>Presented a demo</span><span class="award-pts">+2 🍪</span></div>
+        <div class="award-chip" onclick="openAward('Won ice breaker', 1)"><span>Won ice breaker</span><span class="award-pts">+1 🍪</span></div>
+        <div class="award-chip" onclick="openAward('Suggestion used', 1)"><span>Suggestion used</span><span class="award-pts">+1 🍪</span></div>
+        <div class="award-chip" onclick="openAward('Async participation', 1)"><span>Async participation</span><span class="award-pts">+1 🍪</span></div>
+        <div class="award-chip" onclick="openAward('Best question', 1)"><span>Best question</span><span class="award-pts">+1 🍪</span></div>
       </div>
     </div>
     <div class="divider"></div>
@@ -315,7 +188,6 @@
   </aside>
 </div>
 
-<!-- Lock overlay -->
 <div class="lock-overlay" id="lockOverlay">
   <div class="lock-box">
     <h2>Admin access</h2>
@@ -329,7 +201,6 @@
   </div>
 </div>
 
-<!-- Award modal -->
 <div class="award-overlay" id="awardOverlay">
   <div class="award-box">
     <h2 id="awardTitle"></h2>
@@ -343,7 +214,10 @@
 
 <script>
 const ADMIN_PASSWORD = 'academy2026';
-const STORAGE_KEY = 'oreo_league_v1';
+const BIN_ID = '6acf32bfffd5d1605369acb7';
+const API_KEY = '$2a$10$rdQV8gJf/Vr61j6iwDw1UefInYpuA3.GTHgPYq8nShbjHm4//rdra';
+const BIN_URL = `https://api.jsonbin.io/v3/b/${BIN_ID}`;
+const HEADERS = { 'Content-Type': 'application/json', 'X-Master-Key': API_KEY };
 
 const AVATAR_COLORS = [
   ['#3b2f6e','#a992fc'],['#1e4a3d','#4cd9a0'],['#4a1e2e','#f285a8'],
@@ -354,18 +228,62 @@ const AVATAR_COLORS = [
 let players = [];
 let isAdmin = false;
 let pendingAward = null;
+let pollInterval = null;
+let isSaving = false;
 
-function load() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) players = JSON.parse(saved);
-  } catch(e) {}
+function setSyncStatus(state, msg) {
+  const dot = document.getElementById('syncDot');
+  const label = document.getElementById('syncMsg');
+  dot.className = 'sync-dot ' + state;
+  label.textContent = msg;
 }
-function save() {
-  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(players)); } catch(e) {}
+
+async function loadFromBin() {
+  try {
+    const res = await fetch(BIN_URL + '/latest', { headers: { 'X-Master-Key': API_KEY } });
+    if (!res.ok) throw new Error('fetch failed');
+    const data = await res.json();
+    const fresh = data.record;
+    if (Array.isArray(fresh)) {
+      players = fresh;
+    } else if (fresh && Array.isArray(fresh.players)) {
+      players = fresh.players;
+    }
+    setSyncStatus('ok', 'Live — synced just now');
+    render();
+  } catch(e) {
+    setSyncStatus('err', 'Connection error — retrying...');
+  }
+}
+
+async function saveToBin() {
+  if (isSaving) return;
+  isSaving = true;
+  setSyncStatus('loading', 'Saving...');
+  try {
+    const res = await fetch(BIN_URL, {
+      method: 'PUT',
+      headers: HEADERS,
+      body: JSON.stringify(players)
+    });
+    if (!res.ok) throw new Error('save failed');
+    setSyncStatus('ok', 'Live — synced just now');
+  } catch(e) {
+    setSyncStatus('err', 'Save failed — try again');
+  }
+  isSaving = false;
+}
+
+function startPolling() {
+  if (pollInterval) clearInterval(pollInterval);
+  pollInterval = setInterval(loadFromBin, 15000);
 }
 
 function sorted() { return [...players].sort((a,b) => b.score - a.score); }
+
+function initials(name) { return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
 function render(bumpId) {
   const s = sorted();
@@ -373,23 +291,18 @@ function render(bumpId) {
   renderList(s, bumpId);
 }
 
-function getColor(i) { return AVATAR_COLORS[i % AVATAR_COLORS.length]; }
-
-function initials(name) { return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
-
 function renderPodium(s) {
   const pod = document.getElementById('podium');
-  if (s.length < 1) { pod.innerHTML = ''; return; }
+  if (!s.length) { pod.innerHTML = ''; return; }
   const slots = [
-    { idx: 0, cls: 'first', rank: '1', crown: '👑' },
-    { idx: 1, cls: 'second', rank: '2', crown: null },
-    { idx: 2, cls: 'third', rank: '3', crown: null },
+    { idx:0, cls:'first', rank:'1', crown:'👑' },
+    { idx:1, cls:'second', rank:'2', crown:null },
+    { idx:2, cls:'third', rank:'3', crown:null },
   ].filter(sl => s[sl.idx]);
-
   pod.innerHTML = slots.map(sl => {
     const p = s[sl.idx];
-    const colIdx = players.indexOf(players.find(x => x.id === p.id));
-    const [bg, fg] = getColor(colIdx);
+    const ci = players.findIndex(x => x.id === p.id);
+    const [bg, fg] = AVATAR_COLORS[Math.abs(ci) % AVATAR_COLORS.length];
     return `<div class="podium-slot ${sl.cls}">
       <div class="pod-avatar" style="background:${bg};color:${fg}">
         ${sl.crown ? `<span class="pod-crown">${sl.crown}</span>` : ''}
@@ -413,57 +326,54 @@ function renderList(s, bumpId) {
   const max = Math.max(...players.map(p=>p.score), 1);
   list.innerHTML = rest.map((p, i) => {
     const rank = i + 4;
-    const colIdx = players.indexOf(players.find(x => x.id === p.id));
-    const [bg, fg] = getColor(colIdx);
+    const ci = players.findIndex(x => x.id === p.id);
+    const [bg, fg] = AVATAR_COLORS[Math.abs(ci) % AVATAR_COLORS.length];
     const pct = Math.round((p.score / max) * 100);
-    const isBump = p.id === bumpId;
-    const controls = isAdmin ? `
-      <div class="row-controls">
-        <button class="ctrl-btn minus" onclick="changeScore(${p.id},-1)" aria-label="Remove cookie">−</button>
-        <button class="ctrl-btn plus" onclick="changeScore(${p.id},1)" aria-label="Add cookie">+</button>
-        <button class="ctrl-btn del" onclick="askDel(${p.id},'${esc(p.name).replace(/'/g,"\\'")}'')" aria-label="Remove player">✕</button>
-      </div>` : '';
-    return `<div class="player-row${isBump?' bump':''}" data-id="${p.id}">
+    const controls = isAdmin ? `<div class="row-controls">
+      <button class="ctrl-btn minus" onclick="changeScore(${p.id},-1)">−</button>
+      <button class="ctrl-btn plus" onclick="changeScore(${p.id},1)">+</button>
+      <button class="ctrl-btn del" onclick="askDel(${p.id},'${esc(p.name).replace(/'/g,"\\'")}')">✕</button>
+    </div>` : '';
+    return `<div class="player-row${p.id===bumpId?' bump':''}" data-id="${p.id}">
       <div class="row-rank">${rank}</div>
       <div class="row-avatar" style="background:${bg};color:${fg}">${initials(p.name)}</div>
       <div class="row-info">
         <div class="row-name">${esc(p.name)}</div>
         <div class="row-bar-wrap"><div class="row-bar" style="width:${pct}%"></div></div>
       </div>
-      <div class="row-score"><span class="oreo-pip">🍪</span>${p.score}</div>
+      <div class="row-score">🍪 ${p.score}</div>
       ${controls}
     </div>`;
   }).join('');
 }
 
-function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-
-function addPlayer() {
+async function addPlayer() {
   const inp = document.getElementById('nameInput');
   const err = document.getElementById('addErr');
   const name = inp.value.trim();
-  if (!name) { showErr(err, 'Enter a name first.'); return; }
-  if (players.find(p => p.name.toLowerCase() === name.toLowerCase())) { showErr(err, 'That name already exists.'); return; }
+  if (!name) { err.textContent='Enter a name first.'; err.classList.add('show'); return; }
+  if (players.find(p => p.name.toLowerCase()===name.toLowerCase())) { err.textContent='That name already exists.'; err.classList.add('show'); return; }
   err.classList.remove('show');
   players.push({ id: Date.now(), name, score: 0 });
   inp.value = '';
-  save(); render();
+  render();
+  await saveToBin();
 }
 
-function showErr(el, msg) { el.textContent = msg; el.classList.add('show'); }
-
-function changeScore(id, delta) {
+async function changeScore(id, delta) {
   const p = players.find(p => p.id === id);
   if (!p) return;
   p.score = Math.max(0, p.score + delta);
-  save(); render(id);
+  render(id);
   if (delta > 0) confetti();
+  await saveToBin();
 }
 
-function askDel(id, name) {
+async function askDel(id, name) {
   if (!confirm(`Remove "${name}" from the league?`)) return;
   players = players.filter(p => p.id !== id);
-  save(); render();
+  render();
+  await saveToBin();
 }
 
 function openAward(label, pts) {
@@ -473,21 +383,16 @@ function openAward(label, pts) {
   document.getElementById('awardBody').textContent = `Who gets ${pts} 🍪?`;
   const list = document.getElementById('awardPlayerList');
   list.innerHTML = sorted().map(p => `
-    <button class="award-player-btn" onclick="giveAward(${p.id})">
-      ${esc(p.name)} · 🍪 ${p.score}
-    </button>`).join('');
+    <button class="award-player-btn" onclick="giveAward(${p.id})">${esc(p.name)} · 🍪 ${p.score}</button>`).join('');
   document.getElementById('awardOverlay').classList.add('open');
 }
 
-function giveAward(id) {
+async function giveAward(id) {
   closeAward();
-  changeScore(id, pendingAward);
+  await changeScore(id, pendingAward);
 }
 
-function closeAward() {
-  document.getElementById('awardOverlay').classList.remove('open');
-  pendingAward = null;
-}
+function closeAward() { document.getElementById('awardOverlay').classList.remove('open'); pendingAward = null; }
 
 function handleAdminToggle() {
   if (isAdmin) { lockAdmin(); return; }
@@ -498,8 +403,7 @@ function handleAdminToggle() {
 }
 
 function tryUnlock() {
-  const pw = document.getElementById('pwInput').value;
-  if (pw === ADMIN_PASSWORD) {
+  if (document.getElementById('pwInput').value === ADMIN_PASSWORD) {
     isAdmin = true;
     closeLock();
     document.getElementById('adminPanel').classList.remove('hidden');
@@ -537,14 +441,14 @@ function confetti() {
   }
 }
 
-document.getElementById('pwInput').addEventListener('keydown', e => { if (e.key === 'Enter') tryUnlock(); });
-document.getElementById('nameInput').addEventListener('keydown', e => { if (e.key === 'Enter') addPlayer(); });
+document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') tryUnlock(); });
+document.getElementById('nameInput').addEventListener('keydown', e => { if(e.key==='Enter') addPlayer(); });
 document.getElementById('nameInput').addEventListener('input', () => document.getElementById('addErr').classList.remove('show'));
-document.getElementById('lockOverlay').addEventListener('click', e => { if (e.target === document.getElementById('lockOverlay')) closeLock(); });
-document.getElementById('awardOverlay').addEventListener('click', e => { if (e.target === document.getElementById('awardOverlay')) closeAward(); });
+document.getElementById('lockOverlay').addEventListener('click', e => { if(e.target===document.getElementById('lockOverlay')) closeLock(); });
+document.getElementById('awardOverlay').addEventListener('click', e => { if(e.target===document.getElementById('awardOverlay')) closeAward(); });
 
-load();
-render();
+loadFromBin();
+startPolling();
 </script>
 </body>
 </html>
