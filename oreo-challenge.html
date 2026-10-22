@@ -280,7 +280,7 @@
   async function load() {
     try {
       const [eRes, mRes] = await Promise.all([
-        fetch(API + '?order=created_at.asc', { headers: HEADERS }),
+        fetch(API + '?order=id.asc', { headers: HEADERS }),
         fetch(META_API + '?key=eq.revealed', { headers: HEADERS })
       ]);
       if (!eRes.ok) throw new Error();
