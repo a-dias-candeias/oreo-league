@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Oreo Challenge</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e0c14; --surface: #18151f; --card: #211e2a;
+    --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.18);
+    --text: #f0edf8; --muted: #7a748a; --accent: #7c5cfc;
+    --accent-dim: rgba(124,92,252,0.15); --accent-border: rgba(124,92,252,0.4);
+    --success: #3ecf8e; --danger: #f26b6b;
+    --gold: #f5c842;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  /* Header */
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; border-bottom: 1px solid var(--border); }
+  .brand { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+  .brand span { color: var(--accent); }
+  .badge { font-size: 11px; font-weight: 500; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 999px; padding: 3px 10px; }
+  .header-right { display: flex; align-items: center; gap: 10px; }
+  .admin-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+  .admin-btn:hover { color: var(--text); border-color: var(--border-strong); }
+  .admin-btn.active { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+
+  /* Sync */
+  .sync-bar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 5px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+  .sync-dot.ok { background: var(--success); }
+  .sync-dot.err { background: var(--danger); }
+  .sync-dot.loading { background: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* Layout */
+  .page { max-width: 780px; margin: 0 auto; padding: 32px 24px; }
+
+  /* Challenge header */
+  .challenge-header { text-align: center; margin-bottom: 36px; }
+  .challenge-header h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+  .challenge-header p { font-size: 14px; color: var(--muted); max-width: 480px; margin: 0 auto; line-height: 1.6; }
+
+  /* Submit form */
+  .submit-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 32px; }
+  .submit-section h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .form-row { display: flex; flex-direction: column; gap: 10px; }
+  .form-row input, .form-row textarea {
+    width: 100%; padding: 10px 14px; font-size: 14px; font-family: 'Inter', sans-serif;
+    background: var(--surface); border: 1px solid var(--border); border-radius: 10px;
+    color: var(--text); outline: none; transition: border-color 0.15s; resize: none;
+  }
+  .form-row input:focus, .form-row textarea:focus { border-color: var(--accent-border); }
+  .form-row input::placeholder, .form-row textarea::placeholder { color: var(--muted); }
+  .form-row textarea { height: 80px; }
+  .submit-btn {
+    align-self: flex-end; padding: 10px 20px; font-size: 13px; font-weight: 600;
+    background: var(--accent); color: #fff; border: none; border-radius: 10px;
+    cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s;
+  }
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .form-err { font-size: 12px; color: var(--danger); display: none; }
+  .form-err.show { display: block; }
+  .form-success { font-size: 13px; color: var(--success); display: none; }
+  .form-success.show { display: block; }
+
+  /* Entries */
+  .entries-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .entries-header h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .entry-count { font-size: 12px; color: var(--muted); }
+
+  .entries-grid { display: flex; flex-direction: column; gap: 10px; }
+
+  .entry-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 14px;
+    padding: 16px 18px; display: flex; align-items: flex-start; gap: 14px;
+    transition: border-color 0.2s;
+  }
+  .entry-card:hover { border-color: var(--border-strong); }
+  .entry-card.winner { border-color: var(--gold); background: rgba(245,200,66,0.05); }
+
+  .entry-avatar {
+    width: 38px; height: 38px; border-radius: 50%; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700;
+  }
+  .entry-body { flex: 1; min-width: 0; }
+  .entry-name { font-size: 13px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; }
+  .hobby-tag { font-size: 11px; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 999px; padding: 2px 8px; display: none; }
+  .hobby-tag.revealed { display: inline-flex; }
+  .entry-desc { font-size: 14px; color: var(--text); line-height: 1.6; }
+  .winner-badge { font-size: 13px; }
+
+  .entry-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+
+  /* Vote button */
+  .vote-btn {
+    display: flex; align-items: center; gap: 5px; padding: 6px 12px;
+    font-size: 12px; font-weight: 500; border-radius: 8px; cursor: pointer;
+    border: 1px solid var(--border); background: none; color: var(--muted);
+    font-family: 'Inter', sans-serif; transition: all 0.15s;
+  }
+  .vote-btn:hover { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+  .vote-btn.voted { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+  .vote-count { font-family: 'Syne', sans-serif; font-weight: 700; }
+
+  /* Admin controls on card */
+  .admin-card-controls { display: flex; gap: 6px; }
+  .del-entry-btn {
+    width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border);
+    background: none; color: var(--muted); font-size: 13px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center; transition: all 0.15s;
+  }
+  .del-entry-btn:hover { background: rgba(242,107,107,0.15); color: var(--danger); border-color: rgba(242,107,107,0.4); }
+
+  /* Admin panel */
+  .admin-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 28px; display: none; }
+  .admin-panel.visible { display: block; }
+  .admin-panel h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+  .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-action-btn {
+    padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 8px;
+    cursor: pointer; font-family: 'Inter', sans-serif; border: 1px solid var(--border);
+    background: var(--card); color: var(--text); transition: all 0.15s;
+  }
+  .admin-action-btn:hover { border-color: var(--border-strong); }
+  .admin-action-btn.danger { border-color: rgba(242,107,107,0.3); color: var(--danger); }
+  .admin-action-btn.danger:hover { background: rgba(242,107,107,0.1); }
+  .admin-action-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .admin-action-btn.primary:hover { opacity: 0.85; }
+
+  /* Phase banner */
+  .phase-banner { text-align: center; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 500; margin-bottom: 24px; }
+  .phase-banner.voting { background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); }
+  .phase-banner.reveal { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.3); }
+  .phase-banner.collecting { background: rgba(62,207,142,0.1); color: var(--success); border: 1px solid rgba(62,207,142,0.3); }
+
+  /* Empty */
+  .empty { text-align: center; padding: 40px 24px; color: var(--muted); font-size: 14px; }
+  .empty .big { font-size: 32px; margin-bottom: 8px; }
+
+  /* Lock overlay */
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(14,12,20,0.85); align-items: center; justify-content: center; z-index: 100; }
+  .overlay.open { display: flex; }
+  .overlay-box { background: var(--card); border: 1px solid var(--border-strong); border-radius: 16px; padding: 28px 24px; width: 320px; max-width: 90vw; }
+  .overlay-box h2 { font-family: 'Syne', sans-serif; font-size: 18px; margin-bottom: 6px; }
+  .overlay-box p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .overlay-box input { width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; margin-bottom: 10px; letter-spacing: 0.1em; }
+  .overlay-box input:focus { border-color: var(--accent-border); }
+  .overlay-err { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 10px; }
+  .overlay-actions { display: flex; gap: 8px; }
+  .overlay-actions button { flex: 1; padding: 10px; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; border: none; }
+  .btn-cancel { background: var(--border); color: var(--muted); }
+  .btn-unlock { background: var(--accent); color: #fff; }
+
+  /* Confetti */
+  .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+  .confetto { position: absolute; opacity: 0; animation: cffall linear forwards; border-radius: 2px; }
+  @keyframes cffall { 0%{opacity:1;transform:translateY(-10px) rotate(0)} 100%{opacity:0;transform:translateY(100vh) rotate(540deg)} }
+
+  @media (max-width: 600px) {
+    .page { padding: 20px 14px; }
+    .header { padding: 14px 16px; }
+    .challenge-header h1 { font-size: 22px; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="brand">Oreo <span>Challenge</span> 🍪</div>
+    <div class="badge">AI Academy</div>
+  </div>
+  <div class="header-right">
+    <button class="admin-btn" id="adminBtn" onclick="handleAdminToggle()">
+      <span id="lockIcon">🔒</span><span id="adminLabel">Admin</span>
+    </button>
+  </div>
+</header>
+
+<div class="sync-bar">
+  <div class="sync-dot loading" id="syncDot"></div>
+  <span id="syncMsg">Connecting...</span>
+</div>
+
+<div class="page">
+  <div class="challenge-header">
+    <h1>What's your hobby? 🤔</h1>
+    <p>Ask AI to describe your hobby in the most unhinged way possible. Everyone votes on their favourite. The most chaotic wins an Oreo.</p>
+  </div>
+
+  <!-- Phase banner -->
+  <div class="phase-banner collecting" id="phaseBanner">
+    📝 Submissions open — add yours below!
+  </div>
+
+  <!-- Admin panel -->
+  <div class="admin-panel" id="adminPanel">
+    <h3>Admin controls</h3>
+    <div class="admin-actions">
+      <button class="admin-action-btn primary" onclick="revealAll()">🎭 Reveal all hobbies</button>
+      <button class="admin-action-btn danger" onclick="resetChallenge()">🗑 Reset challenge</button>
+    </div>
+  </div>
+
+  <!-- Submit form -->
+  <div class="submit-section" id="submitSection">
+    <h2>Add your entry</h2>
+    <div class="form-row">
+      <input type="text" id="nameInput" placeholder="Your name" maxlength="30" />
+      <input type="text" id="hobbyInput" placeholder="Your actual hobby (only revealed at the end)" maxlength="40" />
+      <textarea id="descInput" placeholder="Paste the AI's unhinged description here..."></textarea>
+      <div class="form-err" id="formErr"></div>
+      <div class="form-success" id="formSuccess"></div>
+      <button class="submit-btn" id="submitBtn" onclick="submitEntry()">Submit entry</button>
+    </div>
+  </div>
+
+  <!-- Entries -->
+  <div class="entries-header">
+    <h2>Entries</h2>
+    <div class="entry-count" id="entryCount">0 entries</div>
+  </div>
+  <div class="entries-grid" id="entriesGrid"></div>
+</div>
+
+<!-- Lock overlay -->
+<div class="overlay" id="lockOverlay">
+  <div class="overlay-box">
+    <h2>Admin access</h2>
+    <p>Enter the password to manage the challenge.</p>
+    <input type="password" id="pwInput" placeholder="Password" />
+    <div class="overlay-err" id="lockErr"></div>
+    <div class="overlay-actions">
+      <button class="btn-cancel" onclick="closeLock()">Cancel</button>
+      <button class="btn-unlock" onclick="tryUnlock()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<script>
+  const ADMIN_PASSWORD = 'academy2026';
+  const SUPABASE_URL = 'https://xetlpfwgnxphrlddqhzs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhldGxwZndnbnhwaHJsZGRxaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NjA5NTMsImV4cCI6MjEwNzUzNjk1M30.iSUVfQoC6JyMyEqjV-N3Cd6_ADkeZMJHR7cSVjb7Hj0';
+  const API = `${SUPABASE_URL}/rest/v1/challenge_entries`;
+  const META_API = `${SUPABASE_URL}/rest/v1/challenge_meta`;
+  const HEADERS = {
+    'Content-Type': 'application/json',
+    'apikey': SUPABASE_KEY,
+    'Authorization': `Bearer ${SUPABASE_KEY}`,
+    'Prefer': 'return=minimal'
+  };
+
+  const AVATAR_COLORS = [
+    ['#3b2f6e','#a992fc'],['#1e4a3d','#4cd9a0'],['#4a1e2e','#f285a8'],
+    ['#2e2a12','#f5c842'],['#1a2e4a','#6ab0f5'],['#3a1e14','#f59a6a'],
+    ['#1a3a2a','#6af0b0'],['#3a2a1a','#f5b86a'],
+  ];
+
+  let entries = [];
+  let revealed = false;
+  let isAdmin = false;
+  let myVote = localStorage.getItem('oreo_challenge_vote') || null;
+
+  function setSyncStatus(state, msg) {
+    document.getElementById('syncDot').className = 'sync-dot ' + state;
+    document.getElementById('syncMsg').textContent = msg;
+  }
+
+  function initials(name) { return name.trim().split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  async function load() {
+    try {
+      const [eRes, mRes] = await Promise.all([
+        fetch(API + '?order=created_at.asc', { headers: HEADERS }),
+        fetch(META_API + '?key=eq.revealed', { headers: HEADERS })
+      ]);
+      if (!eRes.ok) throw new Error();
+      entries = await eRes.json();
+      if (mRes.ok) {
+        const meta = await mRes.json();
+        revealed = meta.length > 0 && meta[0].value === 'true';
+      }
+      setSyncStatus('ok', 'Live — synced just now');
+      render();
+    } catch(e) {
+      setSyncStatus('err', 'Connection error — retrying...');
+    }
+  }
+
+  async function submitEntry() {
+    const name = document.getElementById('nameInput').value.trim();
+    const hobby = document.getElementById('hobbyInput').value.trim();
+    const desc = document.getElementById('descInput').value.trim();
+    const err = document.getElementById('formErr');
+    const suc = document.getElementById('formSuccess');
+
+    err.classList.remove('show'); suc.classList.remove('show');
+
+    if (!name || !hobby || !desc) { err.textContent = 'Fill in all fields first.'; err.classList.add('show'); return; }
+    if (entries.find(e => e.name.toLowerCase() === name.toLowerCase())) { err.textContent = 'Someone with that name already submitted!'; err.classList.add('show'); return; }
+
+    document.getElementById('submitBtn').disabled = true;
+    setSyncStatus('loading', 'Saving...');
+    try {
+      const res = await fetch(API, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify({ name, hobby, description: desc, votes: 0 })
+      });
+      if (!res.ok) throw new Error();
+      document.getElementById('nameInput').value = '';
+      document.getElementById('hobbyInput').value = '';
+      document.getElementById('descInput').value = '';
+      suc.textContent = '🍪 Entry submitted! Good luck.';
+      suc.classList.add('show');
+      await load();
+    } catch(e) {
+      err.textContent = 'Submit failed — try again.'; err.classList.add('show');
+      setSyncStatus('err', 'Save failed');
+    }
+    document.getElementById('submitBtn').disabled = false;
+  }
+
+  async function vote(id) {
+    if (myVote === String(id)) return;
+    const prev = myVote;
+    myVote = String(id);
+    localStorage.setItem('oreo_challenge_vote', myVote);
+
+    const entry = entries.find(e => e.id === id);
+    if (!entry) return;
+    entry.votes = (entry.votes || 0) + 1;
+
+    if (prev) {
+      const prevEntry = entries.find(e => String(e.id) === prev);
+      if (prevEntry) {
+        prevEntry.votes = Math.max(0, (prevEntry.votes || 0) - 1);
+        await fetch(`${API}?id=eq.${prevEntry.id}`, {
+          method: 'PATCH', headers: HEADERS,
+          body: JSON.stringify({ votes: prevEntry.votes })
+        });
+      }
+    }
+
+    render();
+    await fetch(`${API}?id=eq.${id}`, {
+      method: 'PATCH', headers: HEADERS,
+      body: JSON.stringify({ votes: entry.votes })
+    });
+    setSyncStatus('ok', 'Vote saved!');
+  }
+
+  async function revealAll() {
+    if (!confirm('Reveal all hobbies to everyone?')) return;
+    revealed = true;
+    await fetch(META_API + '?key=eq.revealed', {
+      method: 'DELETE', headers: HEADERS
+    });
+    await fetch(META_API, {
+      method: 'POST', headers: HEADERS,
+      body: JSON.stringify({ key: 'revealed', value: 'true' })
+    });
+    confetti();
+    render();
+  }
+
+  async function deleteEntry(id, name) {
+    if (!confirm(`Remove ${name}'s entry?`)) return;
+    await fetch(`${API}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+    await load();
+  }
+
+  async function resetChallenge() {
+    if (!confirm('Reset ALL entries and start fresh?')) return;
+    await fetch(API + '?id=neq.0', { method: 'DELETE', headers: HEADERS });
+    await fetch(META_API + '?key=eq.revealed', { method: 'DELETE', headers: HEADERS });
+    revealed = false;
+    myVote = null;
+    localStorage.removeItem('oreo_challenge_vote');
+    await load();
+  }
+
+  function getWinner() {
+    if (!entries.length) return null;
+    const max = Math.max(...entries.map(e => e.votes || 0));
+    if (max === 0) return null;
+    return entries.find(e => e.votes === max);
+  }
+
+  function render() {
+    const winner = getWinner();
+
+    // Phase banner
+    const banner = document.getElementById('phaseBanner');
+    if (revealed) {
+      banner.className = 'phase-banner reveal';
+      banner.textContent = winner ? `🏆 Winner: ${winner.name} with ${winner.votes} votes!` : '🎭 Hobbies revealed!';
+    } else {
+      banner.className = 'phase-banner collecting';
+      banner.textContent = '📝 Submissions open — add yours and vote on your favourite!';
+    }
+
+    // Admin panel
+    document.getElementById('adminPanel').className = isAdmin ? 'admin-panel visible' : 'admin-panel';
+
+    // Entry count
+    document.getElementById('entryCount').textContent = `${entries.length} entr${entries.length === 1 ? 'y' : 'ies'}`;
+
+    // Grid
+    const grid = document.getElementById('entriesGrid');
+    if (!entries.length) {
+      grid.innerHTML = '<div class="empty"><div class="big">🤔</div>No entries yet — be the first!</div>';
+      return;
+    }
+
+    const sorted = [...entries].sort((a,b) => (b.votes||0) - (a.votes||0));
+
+    grid.innerHTML = sorted.map((e, i) => {
+      const ci = i % AVATAR_COLORS.length;
+      const [bg, fg] = AVATAR_COLORS[ci];
+      const isWinner = winner && e.id === winner.id && revealed;
+      const isMyVote = myVote === String(e.id);
+      const voteCount = e.votes || 0;
+      const adminControls = isAdmin ? `<div class="admin-card-controls">
+        <button class="del-entry-btn" onclick="deleteEntry(${e.id},'${esc(e.name).replace(/'/g,"\\'")}')">✕</button>
+      </div>` : '';
+
+      return `<div class="entry-card${isWinner ? ' winner' : ''}">
+        <div class="entry-avatar" style="background:${bg};color:${fg}">${initials(e.name)}</div>
+        <div class="entry-body">
+          <div class="entry-name">
+            ${esc(e.name)}
+            ${isWinner ? '<span class="winner-badge">🏆</span>' : ''}
+            <span class="hobby-tag${revealed ? ' revealed' : ''}">${esc(e.hobby)}</span>
+          </div>
+          <div class="entry-desc">"${esc(e.description)}"</div>
+        </div>
+        <div class="entry-actions">
+          <button class="vote-btn${isMyVote ? ' voted' : ''}" onclick="vote(${e.id})">
+            🍪 <span class="vote-count">${voteCount}</span>
+          </button>
+          ${adminControls}
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  function handleAdminToggle() {
+    if (isAdmin) { lockAdmin(); return; }
+    document.getElementById('pwInput').value = '';
+    document.getElementById('lockErr').textContent = '';
+    document.getElementById('lockOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('pwInput').focus(), 50);
+  }
+
+  function tryUnlock() {
+    if (document.getElementById('pwInput').value === ADMIN_PASSWORD) {
+      isAdmin = true;
+      closeLock();
+      document.getElementById('adminBtn').classList.add('active');
+      document.getElementById('lockIcon').textContent = '🔓';
+      document.getElementById('adminLabel').textContent = 'Admin on';
+      render();
+    } else {
+      document.getElementById('lockErr').textContent = 'Wrong password.';
+      document.getElementById('pwInput').select();
+    }
+  }
+
+  function lockAdmin() {
+    isAdmin = false;
+    document.getElementById('adminBtn').classList.remove('active');
+    document.getElementById('lockIcon').textContent = '🔒';
+    document.getElementById('adminLabel').textContent = 'Admin';
+    render();
+  }
+
+  function closeLock() { document.getElementById('lockOverlay').classList.remove('open'); }
+
+  function confetti() {
+    const wrap = document.getElementById('confettiWrap');
+    const colors = ['#7c5cfc','#f5c842','#3ecf8e','#f26b6b','#6ab0f5','#f5b86a'];
+    for (let i = 0; i < 40; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetto';
+      const size = 5 + Math.random() * 8;
+      el.style.cssText = `left:${Math.random()*100}%;top:-12px;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1+Math.random()*1.2}s;animation-delay:${Math.random()*0.5}s;`;
+      wrap.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+
+  document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') tryUnlock(); });
+  document.getElementById('lockOverlay').addEventListener('click', e => { if(e.target===document.getElementById('lockOverlay')) closeLock(); });
+
+  load();
+  setInterval(load, 10000);
+</script>
+</body>
+</html>
