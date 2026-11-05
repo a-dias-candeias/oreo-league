@@ -14,14 +14,13 @@
     --text: #f0edf8; --muted: #7a748a; --accent: #7c5cfc;
     --accent-dim: rgba(124,92,252,0.15); --accent-border: rgba(124,92,252,0.4);
     --success: #3ecf8e; --danger: #f26b6b; --gold: #f5c842;
-    --red-dim: rgba(242,107,107,0.12); --red-border: rgba(242,107,107,0.35);
   }
   body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
 
   .header { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; border-bottom: 1px solid var(--border); }
   .brand { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
   .brand span { color: var(--accent); }
-  .badge { font-size: 11px; font-weight: 500; background: var(--red-dim); color: var(--danger); border: 1px solid var(--red-border); border-radius: 999px; padding: 3px 10px; }
+  .badge { font-size: 11px; font-weight: 500; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 999px; padding: 3px 10px; }
   .admin-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; transition: all 0.15s; font-family: 'Inter', sans-serif; }
   .admin-btn:hover { color: var(--text); border-color: var(--border-strong); }
   .admin-btn.active { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
@@ -37,7 +36,15 @@
 
   .challenge-header { text-align: center; margin-bottom: 36px; }
   .challenge-header h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 10px; }
-  .challenge-header p { font-size: 14px; color: var(--muted); max-width: 480px; margin: 0 auto; line-height: 1.6; }
+  .challenge-header p { font-size: 14px; color: var(--muted); max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+  .how-to { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 24px; }
+  .how-to-title { font-size: 12px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .steps { display: flex; flex-direction: column; gap: 6px; }
+  .step { font-size: 13px; color: var(--muted); display: flex; gap: 10px; }
+  .step-num { color: var(--accent); font-weight: 600; flex-shrink: 0; }
+  .prompt-box { margin-top: 12px; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; font-size: 12px; color: var(--muted); line-height: 1.6; }
+  .prompt-box strong { color: var(--text); }
 
   .phase-banner { text-align: center; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 500; margin-bottom: 24px; }
   .phase-banner.collecting { background: rgba(62,207,142,0.1); color: var(--success); border: 1px solid rgba(62,207,142,0.3); }
@@ -54,25 +61,21 @@
   .admin-action-btn.danger:hover { background: rgba(242,107,107,0.1); }
 
   .submit-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 32px; }
-  .submit-section h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 6px; }
-  .submit-section .hint { font-size: 12px; color: var(--muted); margin-bottom: 16px; }
+  .submit-section h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
   .form-row { display: flex; flex-direction: column; gap: 10px; }
   .form-row input, .form-row textarea { width: 100%; padding: 10px 14px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); outline: none; transition: border-color 0.15s; resize: none; }
   .form-row input:focus, .form-row textarea:focus { border-color: var(--accent-border); }
   .form-row input::placeholder, .form-row textarea::placeholder { color: var(--muted); }
-  .form-row textarea { height: 90px; }
-  .submit-btn { align-self: flex-end; padding: 10px 20px; font-size: 13px; font-weight: 600; background: var(--accent); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s; display: flex; align-items: center; gap: 8px; }
+  .form-row textarea { height: 80px; }
+  .field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: -6px; }
+  .submit-btn { align-self: flex-end; padding: 10px 20px; font-size: 13px; font-weight: 600; background: var(--accent); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s; }
   .submit-btn:hover { opacity: 0.85; }
   .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
   .form-err { font-size: 12px; color: var(--danger); display: none; }
   .form-err.show { display: block; }
   .form-success { font-size: 13px; color: var(--success); display: none; }
   .form-success.show { display: block; }
-
-  .generating-indicator { display: none; align-items: center; gap: 8px; font-size: 13px; color: var(--accent); }
-  .generating-indicator.show { display: flex; }
-  .spinner { width: 14px; height: 14px; border: 2px solid var(--accent-border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
-  @keyframes spin { to { transform: rotate(360deg); } }
 
   .entries-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
   .entries-header h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
@@ -82,27 +85,23 @@
   .confession-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s; }
   .confession-card:hover { border-color: var(--border-strong); }
   .confession-card.winner { border-color: var(--gold); }
-
   .confession-top { padding: 18px 20px; }
   .confession-dramatic { font-size: 15px; line-height: 1.65; color: var(--text); font-style: italic; margin-bottom: 14px; }
   .confession-dramatic::before { content: '"'; color: var(--accent); font-size: 20px; font-style: normal; }
   .confession-dramatic::after { content: '"'; color: var(--accent); font-size: 20px; font-style: normal; }
-
   .confession-meta { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px; }
-  .original-reveal { font-size: 12px; color: var(--muted); display: none; background: var(--surface); border-radius: 6px; padding: 6px 10px; border: 1px solid var(--border); }
-  .original-reveal.show { display: block; }
-  .original-label { font-weight: 600; color: var(--muted); }
-
-  .author-reveal { font-size: 12px; font-weight: 600; display: none; color: var(--gold); }
-  .author-reveal.show { display: flex; align-items: center; gap: 5px; }
-
-  .confession-actions { display: flex; align-items: center; gap: 8px; }
+  .original-box { font-size: 12px; color: var(--muted); background: var(--surface); border-radius: 6px; padding: 6px 10px; border: 1px solid var(--border); display: none; }
+  .original-box.show { display: block; }
+  .author-tag { font-size: 12px; font-weight: 600; color: var(--gold); display: none; align-items: center; gap: 5px; }
+  .author-tag.show { display: flex; }
+  .confession-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
   .vote-btn { display: flex; align-items: center; gap: 5px; padding: 6px 12px; font-size: 12px; font-weight: 500; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); background: none; color: var(--muted); font-family: 'Inter', sans-serif; transition: all 0.15s; }
-  .vote-btn:hover { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
-  .vote-btn.voted { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+  .vote-btn:hover, .vote-btn.voted { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
   .vote-count { font-family: 'Syne', sans-serif; font-weight: 700; }
   .del-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
   .del-btn:hover { background: rgba(242,107,107,0.15); color: var(--danger); border-color: rgba(242,107,107,0.4); }
+  .admin-original { font-size: 11px; color: var(--muted); padding: 4px 8px; background: var(--surface); border-radius: 6px; border: 1px solid var(--border); display: none; }
+  .admin-original.show { display: inline-block; }
 
   .guesses-section { border-top: 1px solid var(--border); padding: 12px 20px; background: rgba(0,0,0,0.15); }
   .guesses-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
@@ -118,7 +117,6 @@
   .guess-text-input { flex: 1; min-width: 120px; }
   .guess-submit-btn { padding: 7px 14px; font-size: 12px; font-weight: 600; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; white-space: nowrap; }
   .guess-submit-btn:hover { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
-  .guess-submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
 
   .empty { text-align: center; padding: 40px 24px; color: var(--muted); font-size: 14px; }
   .empty .big { font-size: 32px; margin-bottom: 8px; }
@@ -169,7 +167,21 @@
 <div class="page">
   <div class="challenge-header">
     <h1>We all have secrets. 🙈</h1>
-    <p>Write a work confession. AI rewrites it dramatically. The team guesses who confessed. The most dramatic wins an Oreo.</p>
+    <p>Write a work confession. Ask AI to make it dramatic. The team guesses who said it. The most dramatic wins an Oreo.</p>
+  </div>
+
+  <div class="how-to">
+    <div class="how-to-title">How to play</div>
+    <div class="steps">
+      <div class="step"><span class="step-num">1.</span> Think of a work confession (the more honest, the better)</div>
+      <div class="step"><span class="step-num">2.</span> Ask Claude or ChatGPT to rewrite it dramatically using this prompt:</div>
+    </div>
+    <div class="prompt-box">
+      <strong>Copy this prompt →</strong> "Rewrite this work confession in the most dramatic, over-the-top way possible. Like a courtroom confession or a soap opera. 1-2 sentences max, no quotes: [YOUR CONFESSION]"
+    </div>
+    <div class="steps" style="margin-top:8px;">
+      <div class="step"><span class="step-num">3.</span> Submit both versions below — the original stays hidden until the end!</div>
+    </div>
   </div>
 
   <div class="phase-banner collecting" id="phaseBanner">
@@ -185,20 +197,26 @@
   </div>
 
   <div class="submit-section">
-    <h2>Your confession</h2>
-    <div class="hint">Be honest. AI will make it more dramatic. Your name stays hidden until the end. 🤫</div>
+    <h2>Submit your confession</h2>
     <div class="form-row">
-      <input type="text" id="authorInput" placeholder="Your name (hidden until revealed)" maxlength="30" />
-      <textarea id="confessionInput" placeholder='e.g. "I have never read a Confluence page in my life"'></textarea>
-      <div class="form-err" id="formErr"></div>
-      <div class="generating-indicator" id="generatingIndicator">
-        <div class="spinner"></div>
-        AI is dramatizing your confession...
+      <div>
+        <div class="field-label">Your name</div>
+        <input type="text" id="authorInput" placeholder="e.g. Alexandra" maxlength="30" />
+        <div class="field-hint">Hidden until the end 🤫</div>
       </div>
+      <div>
+        <div class="field-label">Your original confession</div>
+        <input type="text" id="originalInput" placeholder='e.g. "I never read emails longer than 3 lines"' maxlength="200" />
+        <div class="field-hint">Also hidden until revealed</div>
+      </div>
+      <div>
+        <div class="field-label">AI dramatic version</div>
+        <textarea id="dramaticInput" placeholder="Paste the AI's dramatic rewrite here — this is what everyone sees..."></textarea>
+        <div class="field-hint">This is the one people will guess from!</div>
+      </div>
+      <div class="form-err" id="formErr"></div>
       <div class="form-success" id="formSuccess"></div>
-      <button class="submit-btn" id="submitBtn" onclick="submitConfession()">
-        <span>Confess & dramatize</span> 🎭
-      </button>
+      <button class="submit-btn" id="submitBtn" onclick="submitConfession()">Submit confession 🎭</button>
     </div>
   </div>
 
@@ -242,23 +260,6 @@
   }
   function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
-  async function dramatize(confession) {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-6',
-        max_tokens: 1000,
-        messages: [{
-          role: 'user',
-          content: `Rewrite this work confession in the most dramatic, over-the-top way possible. Make it sound like a confession in a courtroom drama or a soap opera. Keep it to 1-2 sentences max. Do not include quotation marks. Confession: "${confession}"`
-        }]
-      })
-    });
-    const data = await res.json();
-    return data.content[0].text.trim();
-  }
-
   async function load() {
     try {
       const [cRes, gRes, mRes] = await Promise.all([
@@ -282,57 +283,46 @@
 
   async function submitConfession() {
     const author = document.getElementById('authorInput').value.trim();
-    const original = document.getElementById('confessionInput').value.trim();
+    const original = document.getElementById('originalInput').value.trim();
+    const dramatic = document.getElementById('dramaticInput').value.trim();
     const err = document.getElementById('formErr');
     const suc = document.getElementById('formSuccess');
-    const gen = document.getElementById('generatingIndicator');
     err.classList.remove('show'); suc.classList.remove('show');
 
-    if (!author || !original) { err.textContent = 'Fill in both fields first.'; err.classList.add('show'); return; }
+    if (!author || !original || !dramatic) { err.textContent = 'Fill in all three fields!'; err.classList.add('show'); return; }
     if (confessions.find(c => c.author.toLowerCase() === author.toLowerCase())) {
-      err.textContent = 'You already confessed! One per person.'; err.classList.add('show'); return;
+      err.textContent = 'You already submitted a confession!'; err.classList.add('show'); return;
     }
 
     document.getElementById('submitBtn').disabled = true;
-    gen.classList.add('show');
-    setSyncStatus('loading', 'Generating...');
-
+    setSyncStatus('loading', 'Saving...');
     try {
-      const dramatic = await dramatize(original);
-      gen.classList.remove('show');
-
       const res = await fetch(API, {
         method: 'POST', headers: HEADERS,
         body: JSON.stringify({ author, original, dramatic, votes: 0 })
       });
       if (!res.ok) throw new Error();
-
       document.getElementById('authorInput').value = '';
-      document.getElementById('confessionInput').value = '';
-      suc.textContent = '🎭 Confession submitted!';
+      document.getElementById('originalInput').value = '';
+      document.getElementById('dramaticInput').value = '';
+      suc.textContent = '🎭 Confession submitted! Now go guess the others.';
       suc.classList.add('show');
       await load();
     } catch(e) {
-      gen.classList.remove('show');
-      err.textContent = 'Something went wrong — try again.';
-      err.classList.add('show');
+      err.textContent = 'Submit failed — try again.'; err.classList.add('show');
       setSyncStatus('err', 'Error');
     }
     document.getElementById('submitBtn').disabled = false;
   }
 
-  async function submitGuess(confessionId, btnEl) {
-    const nameEl = document.getElementById(`gname-${confessionId}`);
-    const textEl = document.getElementById(`gtext-${confessionId}`);
-    const name = nameEl.value.trim();
-    const text = textEl.value.trim();
+  async function submitGuess(cId, btnEl) {
+    const nameEl = document.getElementById(`gname-${cId}`);
+    const textEl = document.getElementById(`gtext-${cId}`);
+    const name = nameEl.value.trim(), text = textEl.value.trim();
     if (!name || !text) return;
     btnEl.disabled = true;
     try {
-      const res = await fetch(GUESSES_API, {
-        method: 'POST', headers: HEADERS,
-        body: JSON.stringify({ entry_id: confessionId, guesser_name: name, guess: text })
-      });
+      const res = await fetch(GUESSES_API, { method: 'POST', headers: HEADERS, body: JSON.stringify({ entry_id: cId, guesser_name: name, guess: text }) });
       if (!res.ok) throw new Error();
       textEl.value = '';
       await load();
@@ -348,14 +338,11 @@
     if (!c) return;
     c.votes = (c.votes || 0) + 1;
     if (prev && prev !== String(id)) {
-      const prevC = confessions.find(c => String(c.id) === prev);
-      if (prevC) {
-        prevC.votes = Math.max(0, (prevC.votes || 0) - 1);
-        await fetch(`${API}?id=eq.${prevC.id}`, { method: 'PATCH', headers: HEADERS, body: JSON.stringify({ votes: prevC.votes }) });
-      }
+      const p = confessions.find(c => String(c.id) === prev);
+      if (p) { p.votes = Math.max(0, (p.votes||0)-1); await fetch(`${API}?id=eq.${p.id}`, { method:'PATCH', headers: HEADERS, body: JSON.stringify({votes: p.votes}) }); }
     }
     render();
-    await fetch(`${API}?id=eq.${id}`, { method: 'PATCH', headers: HEADERS, body: JSON.stringify({ votes: c.votes }) });
+    await fetch(`${API}?id=eq.${id}`, { method:'PATCH', headers: HEADERS, body: JSON.stringify({votes: c.votes}) });
     setSyncStatus('ok', 'Vote saved!');
   }
 
@@ -375,7 +362,7 @@
   }
 
   async function resetAll() {
-    if (!confirm('Reset ALL confessions and start fresh?')) return;
+    if (!confirm('Reset ALL confessions?')) return;
     await fetch(GUESSES_API + '?id=gte.0', { method: 'DELETE', headers: HEADERS });
     await fetch(API + '?id=gte.0', { method: 'DELETE', headers: HEADERS });
     await fetch(META_API + '?key=eq.confessions_revealed', { method: 'DELETE', headers: HEADERS });
@@ -386,7 +373,7 @@
 
   function getWinner() {
     if (!confessions.length) return null;
-    const max = Math.max(...confessions.map(c => c.votes || 0));
+    const max = Math.max(...confessions.map(c => c.votes||0));
     if (max === 0) return null;
     return confessions.find(c => c.votes === max);
   }
@@ -412,36 +399,33 @@
     }
 
     const sorted = [...confessions].sort((a,b) => (b.votes||0) - (a.votes||0));
-    grid.innerHTML = sorted.map((c) => {
+    grid.innerHTML = sorted.map(c => {
       const isWinner = winner && c.id === winner.id && revealed;
       const isMyVote = myVote === String(c.id);
       const entryGuesses = guesses.filter(g => g.entry_id === c.id);
-      const adminControls = isAdmin ? `
-        <button class="del-btn" onclick="deleteConfession(${c.id},'${esc(c.author).replace(/'/g,"\\'")}')">✕</button>
-        ${revealed ? '' : `<span style="font-size:11px;color:var(--muted);padding:4px 8px;background:var(--surface);border-radius:6px;border:1px solid var(--border);">by ${esc(c.author)}</span>`}
-      ` : '';
 
       const guessesList = entryGuesses.length
         ? entryGuesses.map(g => `<div class="guess-item"><span class="guess-author">${esc(g.guesser_name)}:</span><span class="guess-text">${esc(g.guess)}</span></div>`).join('')
         : `<div class="no-guesses">No guesses yet — who do you think said this?</div>`;
 
+      const adminBar = isAdmin ? `<span class="admin-original show">by ${esc(c.author)} · "${esc(c.original)}"</span>` : '';
+      const authorTag = `<div class="author-tag${revealed?' show':''}">👤 ${esc(c.author)}${isWinner?' 🏆':''}</div>`;
+      const originalBox = `<div class="original-box${revealed?' show':''}"><strong>Original:</strong> ${esc(c.original)}</div>`;
+      const delBtn = isAdmin ? `<button class="del-btn" onclick="deleteConfession(${c.id},'${esc(c.author).replace(/'/g,"\\'")}')">✕</button>` : '';
+
       return `<div class="confession-card${isWinner?' winner':''}">
         <div class="confession-top">
           <div class="confession-dramatic">${esc(c.dramatic)}</div>
-          <div class="confession-meta">
-            <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
-              <div class="original-reveal${revealed||isAdmin?' show':''}">
-                <span class="original-label">Original: </span>${esc(c.original)}
-              </div>
-              <div class="author-reveal${revealed?' show':''}">
-                👤 ${esc(c.author)} ${isWinner?'🏆':''}
-              </div>
-            </div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            ${originalBox}
+            ${authorTag}
+            ${adminBar}
+          </div>
+          <div class="confession-meta" style="margin-top:10px;">
+            <div></div>
             <div class="confession-actions">
-              <button class="vote-btn${isMyVote?' voted':''}" onclick="vote(${c.id})">
-                🍪 <span class="vote-count">${c.votes||0}</span>
-              </button>
-              ${adminControls}
+              <button class="vote-btn${isMyVote?' voted':''}" onclick="vote(${c.id})">🍪 <span class="vote-count">${c.votes||0}</span></button>
+              ${delBtn}
             </div>
           </div>
         </div>
@@ -458,7 +442,7 @@
 
     sorted.forEach(c => {
       const ti = document.getElementById(`gtext-${c.id}`);
-      if (ti) ti.addEventListener('keydown', ev => { if(ev.key==='Enter') { ev.preventDefault(); ti.nextElementSibling && ti.nextElementSibling.click(); } });
+      if (ti) ti.addEventListener('keydown', ev => { if(ev.key==='Enter'){ev.preventDefault(); ti.nextElementSibling&&ti.nextElementSibling.click();} });
     });
   }
 
