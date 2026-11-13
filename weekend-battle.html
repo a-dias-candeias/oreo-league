@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weekend Battle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --bg: #0e0c14; --surface: #18151f; --card: #211e2a;
+    --border: rgba(255,255,255,0.08); --border-strong: rgba(255,255,255,0.18);
+    --text: #f0edf8; --muted: #7a748a; --accent: #7c5cfc;
+    --accent-dim: rgba(124,92,252,0.15); --accent-border: rgba(124,92,252,0.4);
+    --success: #3ecf8e; --danger: #f26b6b; --gold: #f5c842;
+  }
+  body { font-family: 'Inter', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .header { display: flex; align-items: center; justify-content: space-between; padding: 18px 28px; border-bottom: 1px solid var(--border); }
+  .brand { font-family: 'Syne', sans-serif; font-size: 20px; font-weight: 800; }
+  .brand span { color: var(--accent); }
+  .badge { font-size: 11px; font-weight: 500; background: var(--accent-dim); color: var(--accent); border: 1px solid var(--accent-border); border-radius: 999px; padding: 3px 10px; }
+  .admin-btn { display: flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 500; cursor: pointer; color: var(--muted); background: none; border: 1px solid var(--border); border-radius: 8px; padding: 6px 12px; transition: all 0.15s; font-family: 'Inter', sans-serif; }
+  .admin-btn:hover { color: var(--text); border-color: var(--border-strong); }
+  .admin-btn.active { color: var(--accent); border-color: var(--accent-border); background: var(--accent-dim); }
+
+  .sync-bar { display: flex; align-items: center; justify-content: center; gap: 8px; padding: 5px 16px; font-size: 12px; color: var(--muted); border-bottom: 1px solid var(--border); }
+  .sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); flex-shrink: 0; }
+  .sync-dot.ok { background: var(--success); }
+  .sync-dot.err { background: var(--danger); }
+  .sync-dot.loading { background: var(--accent); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  .page { max-width: 900px; margin: 0 auto; padding: 32px 24px; }
+
+  .challenge-header { text-align: center; margin-bottom: 32px; }
+  .challenge-header h1 { font-family: 'Syne', sans-serif; font-size: 28px; font-weight: 800; margin-bottom: 10px; }
+  .challenge-header p { font-size: 14px; color: var(--muted); max-width: 500px; margin: 0 auto; line-height: 1.6; }
+
+  .how-to { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin-bottom: 24px; }
+  .how-to-title { font-size: 11px; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); margin-bottom: 10px; }
+  .steps { display: flex; flex-direction: column; gap: 6px; }
+  .step { font-size: 13px; color: var(--muted); display: flex; gap: 10px; line-height: 1.5; }
+  .step-num { color: var(--accent); font-weight: 600; flex-shrink: 0; }
+
+  .phase-banner { text-align: center; padding: 10px; border-radius: 10px; font-size: 13px; font-weight: 500; margin-bottom: 24px; }
+  .phase-banner.collecting { background: rgba(62,207,142,0.1); color: var(--success); border: 1px solid rgba(62,207,142,0.3); }
+  .phase-banner.reveal { background: rgba(245,200,66,0.1); color: var(--gold); border: 1px solid rgba(245,200,66,0.3); }
+
+  .admin-panel { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 20px; margin-bottom: 28px; display: none; }
+  .admin-panel.visible { display: block; }
+  .admin-panel h3 { font-family: 'Syne', sans-serif; font-size: 14px; font-weight: 700; margin-bottom: 14px; }
+  .admin-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .admin-action-btn { padding: 8px 14px; font-size: 12px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; border: 1px solid var(--border); background: var(--card); color: var(--text); transition: all 0.15s; }
+  .admin-action-btn.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
+  .admin-action-btn.primary:hover { opacity: 0.85; }
+  .admin-action-btn.danger { border-color: rgba(242,107,107,0.3); color: var(--danger); }
+  .admin-action-btn.danger:hover { background: rgba(242,107,107,0.1); }
+
+  .submit-section { background: var(--card); border: 1px solid var(--border); border-radius: 16px; padding: 24px; margin-bottom: 32px; }
+  .submit-section h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 16px; }
+  .form-row { display: flex; flex-direction: column; gap: 12px; }
+  .field-label { font-size: 11px; font-weight: 600; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin-bottom: 4px; }
+  .field-hint { font-size: 11px; color: var(--muted); margin-top: 3px; }
+  .form-row input { width: 100%; padding: 10px 14px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: 10px; color: var(--text); outline: none; transition: border-color 0.15s; }
+  .form-row input:focus { border-color: var(--accent-border); }
+  .form-row input::placeholder { color: var(--muted); }
+
+  .upload-area { border: 2px dashed var(--border); border-radius: 10px; padding: 24px; text-align: center; cursor: pointer; transition: all 0.15s; background: var(--surface); position: relative; }
+  .upload-area:hover { border-color: var(--accent-border); background: var(--accent-dim); }
+  .upload-area.has-image { border-style: solid; border-color: var(--success); padding: 8px; }
+  .upload-area input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
+  .upload-label { font-size: 13px; color: var(--muted); pointer-events: none; }
+  .upload-label span { color: var(--accent); font-weight: 500; }
+  .preview-img { width: 100%; max-height: 200px; object-fit: cover; border-radius: 8px; display: none; }
+  .preview-img.show { display: block; }
+
+  .submit-btn { width: 100%; padding: 12px; font-size: 14px; font-weight: 600; background: var(--accent); color: #fff; border: none; border-radius: 10px; cursor: pointer; font-family: 'Inter', sans-serif; transition: opacity 0.15s; margin-top: 4px; }
+  .submit-btn:hover { opacity: 0.85; }
+  .submit-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .form-err { font-size: 12px; color: var(--danger); display: none; }
+  .form-err.show { display: block; }
+  .form-success { font-size: 13px; color: var(--success); display: none; }
+  .form-success.show { display: block; }
+
+  .entries-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px; }
+  .entries-header h2 { font-family: 'Syne', sans-serif; font-size: 16px; font-weight: 700; }
+  .entry-count { font-size: 12px; color: var(--muted); }
+
+  .images-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; }
+
+  .entry-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; overflow: hidden; transition: border-color 0.2s; }
+  .entry-card:hover { border-color: var(--border-strong); }
+  .entry-card.winner { border-color: var(--gold); }
+
+  .image-wrap { width: 100%; aspect-ratio: 4/3; overflow: hidden; background: var(--surface); }
+  .image-wrap img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .card-body { padding: 14px 16px; }
+  .card-author { font-family: 'Syne', sans-serif; font-size: 15px; font-weight: 700; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+  .plan-reveal { font-size: 13px; color: var(--success); background: rgba(62,207,142,0.1); border: 1px solid rgba(62,207,142,0.3); border-radius: 8px; padding: 8px 12px; margin-bottom: 10px; display: none; }
+  .plan-reveal.show { display: block; }
+  .plan-label { font-weight: 600; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 3px; color: var(--success); }
+
+  .guesses-wrap { border-top: 1px solid var(--border); padding-top: 12px; margin-top: 10px; }
+  .guesses-title { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em; color: var(--muted); margin-bottom: 8px; }
+  .guesses-list { display: flex; flex-direction: column; gap: 5px; margin-bottom: 10px; }
+  .guess-item { display: flex; gap: 8px; font-size: 13px; align-items: baseline; }
+  .guess-author { font-weight: 600; color: var(--accent); flex-shrink: 0; }
+  .guess-text { color: var(--muted); }
+  .no-guesses { font-size: 12px; color: var(--muted); font-style: italic; margin-bottom: 10px; }
+
+  .guess-form { display: flex; gap: 6px; flex-wrap: wrap; }
+  .guess-name-input, .guess-text-input { font-size: 13px; font-family: 'Inter', sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 10px; outline: none; transition: border-color 0.15s; }
+  .guess-name-input:focus, .guess-text-input:focus { border-color: var(--accent-border); }
+  .guess-name-input::placeholder, .guess-text-input::placeholder { color: var(--muted); }
+  .guess-name-input { width: 100px; flex-shrink: 0; }
+  .guess-text-input { flex: 1; min-width: 100px; }
+  .guess-submit-btn { padding: 7px 12px; font-size: 12px; font-weight: 600; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); cursor: pointer; font-family: 'Inter', sans-serif; transition: all 0.15s; white-space: nowrap; }
+  .guess-submit-btn:hover { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+
+  .card-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 10px; }
+  .vote-btn { display: flex; align-items: center; gap: 5px; padding: 6px 12px; font-size: 12px; font-weight: 500; border-radius: 8px; cursor: pointer; border: 1px solid var(--border); background: none; color: var(--muted); font-family: 'Inter', sans-serif; transition: all 0.15s; }
+  .vote-btn:hover, .vote-btn.voted { border-color: var(--accent-border); color: var(--accent); background: var(--accent-dim); }
+  .vote-count { font-family: 'Syne', sans-serif; font-weight: 700; }
+  .del-btn { width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--border); background: none; color: var(--muted); font-size: 13px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.15s; }
+  .del-btn:hover { background: rgba(242,107,107,0.15); color: var(--danger); border-color: rgba(242,107,107,0.4); }
+
+  .empty { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 14px; grid-column: 1/-1; }
+  .empty .big { font-size: 36px; margin-bottom: 8px; }
+
+  .overlay { display: none; position: fixed; inset: 0; background: rgba(14,12,20,0.85); align-items: center; justify-content: center; z-index: 100; }
+  .overlay.open { display: flex; }
+  .overlay-box { background: var(--card); border: 1px solid var(--border-strong); border-radius: 16px; padding: 28px 24px; width: 320px; max-width: 90vw; }
+  .overlay-box h2 { font-family: 'Syne', sans-serif; font-size: 18px; margin-bottom: 6px; }
+  .overlay-box p { font-size: 13px; color: var(--muted); margin-bottom: 20px; }
+  .overlay-box input { width: 100%; padding: 10px 12px; font-size: 14px; font-family: 'Inter', sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; color: var(--text); outline: none; margin-bottom: 10px; letter-spacing: 0.1em; }
+  .overlay-box input:focus { border-color: var(--accent-border); }
+  .overlay-err { font-size: 12px; color: var(--danger); min-height: 16px; margin-bottom: 10px; }
+  .overlay-actions { display: flex; gap: 8px; }
+  .overlay-actions button { flex: 1; padding: 10px; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; font-family: 'Inter', sans-serif; border: none; }
+  .btn-cancel { background: var(--border); color: var(--muted); }
+  .btn-unlock { background: var(--accent); color: #fff; }
+
+  .confetti-wrap { position: fixed; inset: 0; pointer-events: none; z-index: 200; overflow: hidden; }
+  .confetto { position: absolute; opacity: 0; animation: cffall linear forwards; border-radius: 2px; }
+  @keyframes cffall { 0%{opacity:1;transform:translateY(-10px) rotate(0)} 100%{opacity:0;transform:translateY(100vh) rotate(540deg)} }
+
+  @media (max-width: 600px) {
+    .page { padding: 20px 14px; }
+    .header { padding: 14px 16px; }
+    .challenge-header h1 { font-size: 22px; }
+    .images-grid { grid-template-columns: 1fr; }
+    .guess-form { flex-direction: column; }
+    .guess-name-input { width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div style="display:flex;align-items:center;gap:12px;">
+    <div class="brand">Weekend <span>Battle</span> 🌅</div>
+    <div class="badge">Oreo League</div>
+  </div>
+  <button class="admin-btn" id="adminBtn" onclick="handleAdminToggle()">
+    <span id="lockIcon">🔒</span><span id="adminLabel">Admin</span>
+  </button>
+</header>
+
+<div class="sync-bar">
+  <div class="sync-dot loading" id="syncDot"></div>
+  <span id="syncMsg">Connecting...</span>
+</div>
+
+<div class="page">
+  <div class="challenge-header">
+    <h1>What are you doing this weekend? 🌅</h1>
+    <p>Generate an AI image of your weekend plans, upload it here, and let the team guess what you're up to!</p>
+  </div>
+
+  <div class="how-to">
+    <div class="how-to-title">How to play</div>
+    <div class="steps">
+      <div class="step"><span class="step-num">1.</span> Think of something you're doing this weekend</div>
+      <div class="step"><span class="step-num">2.</span> Go to ChatGPT, DALL-E, or any AI image tool and generate an image of it — be creative with the prompt!</div>
+      <div class="step"><span class="step-num">3.</span> Save the image and upload it below along with your actual plan (hidden until the end)</div>
+      <div class="step"><span class="step-num">4.</span> Everyone guesses what you're doing based on the image 👇</div>
+    </div>
+  </div>
+
+  <div class="phase-banner collecting" id="phaseBanner">
+    📝 Submit your image and guess the others!
+  </div>
+
+  <div class="admin-panel" id="adminPanel">
+    <h3>Admin controls</h3>
+    <div class="admin-actions">
+      <button class="admin-action-btn primary" onclick="revealAll()">🎭 Reveal all plans</button>
+      <button class="admin-action-btn danger" onclick="resetAll()">🗑 Reset everything</button>
+    </div>
+  </div>
+
+  <div class="submit-section">
+    <h2>Your entry</h2>
+    <div class="form-row">
+      <div>
+        <div class="field-label">Your name</div>
+        <input type="text" id="authorInput" placeholder="e.g. Alexandra" maxlength="30" />
+      </div>
+      <div>
+        <div class="field-label">Your actual weekend plan</div>
+        <input type="text" id="planInput" placeholder='e.g. "Going hiking in Sintra"' maxlength="150" />
+        <div class="field-hint">Hidden until admin reveals at the end 🤫</div>
+      </div>
+      <div>
+        <div class="field-label">AI generated image</div>
+        <div class="upload-area" id="uploadArea">
+          <input type="file" id="fileInput" accept="image/*" onchange="handleFileSelect(this)" />
+          <div class="upload-label" id="uploadLabel">📁 Click or drag to upload your AI image<br><span>No account needed — select directly from your device</span></div>
+          <img class="preview-img" id="previewImg" />
+        </div>
+      </div>
+      <div class="form-err" id="formErr"></div>
+      <div class="form-success" id="formSuccess"></div>
+      <button class="submit-btn" id="submitBtn" onclick="submitEntry()">Submit my weekend 🚀</button>
+    </div>
+  </div>
+
+  <div class="entries-header">
+    <h2>Entries</h2>
+    <div class="entry-count" id="entryCount">0 entries</div>
+  </div>
+  <div class="images-grid" id="imagesGrid"></div>
+</div>
+
+<div class="overlay" id="lockOverlay">
+  <div class="overlay-box">
+    <h2>Admin access</h2>
+    <p>Enter the password to manage the game.</p>
+    <input type="password" id="pwInput" placeholder="Password" />
+    <div class="overlay-err" id="lockErr"></div>
+    <div class="overlay-actions">
+      <button class="btn-cancel" onclick="closeLock()">Cancel</button>
+      <button class="btn-unlock" onclick="tryUnlock()">Unlock</button>
+    </div>
+  </div>
+</div>
+
+<div class="confetti-wrap" id="confettiWrap"></div>
+
+<script>
+  const ADMIN_PASSWORD = 'academy2026';
+  const SUPABASE_URL = 'https://xetlpfwgnxphrlddqhzs.supabase.co';
+  const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhldGxwZndnbnhwaHJsZGRxaHpzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTE5NjA5NTMsImV4cCI6MjEwNzUzNjk1M30.iSUVfQoC6JyMyEqjV-N3Cd6_ADkeZMJHR7cSVjb7Hj0';
+  const ENTRIES_API = `${SUPABASE_URL}/rest/v1/weekend_entries`;
+  const GUESSES_API = `${SUPABASE_URL}/rest/v1/weekend_guesses`;
+  const META_API = `${SUPABASE_URL}/rest/v1/challenge_meta`;
+  const HEADERS = { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Prefer': 'return=minimal' };
+
+  let entries = [], guesses = [], revealed = false, isAdmin = false;
+  let myVote = localStorage.getItem('oreo_weekend_vote') || null;
+  let selectedImageBase64 = null;
+
+  function setSyncStatus(state, msg) {
+    document.getElementById('syncDot').className = 'sync-dot ' + state;
+    document.getElementById('syncMsg').textContent = msg;
+  }
+  function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+  function handleFileSelect(input) {
+    const file = input.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) {
+      document.getElementById('formErr').textContent = 'Image too large — please use an image under 2MB.';
+      document.getElementById('formErr').classList.add('show');
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      selectedImageBase64 = e.target.result;
+      const preview = document.getElementById('previewImg');
+      preview.src = selectedImageBase64;
+      preview.classList.add('show');
+      document.getElementById('uploadLabel').style.display = 'none';
+      document.getElementById('uploadArea').classList.add('has-image');
+      document.getElementById('formErr').classList.remove('show');
+    };
+    reader.readAsDataURL(file);
+  }
+
+  async function load() {
+    try {
+      const [eRes, gRes, mRes] = await Promise.all([
+        fetch(ENTRIES_API + '?order=id.asc', { headers: HEADERS }),
+        fetch(GUESSES_API + '?order=id.asc', { headers: HEADERS }),
+        fetch(META_API + '?key=eq.weekend_revealed', { headers: HEADERS })
+      ]);
+      if (!eRes.ok || !gRes.ok) throw new Error();
+      entries = await eRes.json();
+      guesses = await gRes.json();
+      if (mRes.ok) {
+        const meta = await mRes.json();
+        revealed = meta.length > 0 && meta[0].value === 'true';
+      }
+      setSyncStatus('ok', 'Live — synced just now');
+      render();
+    } catch(e) {
+      setSyncStatus('err', 'Connection error — retrying...');
+    }
+  }
+
+  async function submitEntry() {
+    const author = document.getElementById('authorInput').value.trim();
+    const plan = document.getElementById('planInput').value.trim();
+    const err = document.getElementById('formErr');
+    const suc = document.getElementById('formSuccess');
+    err.classList.remove('show'); suc.classList.remove('show');
+
+    if (!author || !plan || !selectedImageBase64) {
+      err.textContent = !selectedImageBase64 ? 'Please upload an image first!' : 'Fill in all fields!';
+      err.classList.add('show'); return;
+    }
+    if (entries.find(e => e.author.toLowerCase() === author.toLowerCase())) {
+      err.textContent = 'You already submitted an entry!'; err.classList.add('show'); return;
+    }
+
+    document.getElementById('submitBtn').disabled = true;
+    setSyncStatus('loading', 'Uploading...');
+    try {
+      const res = await fetch(ENTRIES_API, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ author, plan, image_data: selectedImageBase64, votes: 0 })
+      });
+      if (!res.ok) throw new Error();
+      document.getElementById('authorInput').value = '';
+      document.getElementById('planInput').value = '';
+      document.getElementById('previewImg').classList.remove('show');
+      document.getElementById('uploadLabel').style.display = '';
+      document.getElementById('uploadArea').classList.remove('has-image');
+      document.getElementById('fileInput').value = '';
+      selectedImageBase64 = null;
+      suc.textContent = '🌅 Entry submitted! Now guess the others.';
+      suc.classList.add('show');
+      await load();
+    } catch(e) {
+      err.textContent = 'Submit failed — image might be too large. Try a smaller image.';
+      err.classList.add('show');
+      setSyncStatus('err', 'Error');
+    }
+    document.getElementById('submitBtn').disabled = false;
+  }
+
+  async function submitGuess(entryId, btnEl) {
+    const nameEl = document.getElementById(`gname-${entryId}`);
+    const textEl = document.getElementById(`gtext-${entryId}`);
+    const name = nameEl.value.trim(), text = textEl.value.trim();
+    if (!name || !text) return;
+    btnEl.disabled = true;
+    try {
+      const res = await fetch(GUESSES_API, {
+        method: 'POST', headers: HEADERS,
+        body: JSON.stringify({ entry_id: entryId, guesser_name: name, guess_weekend: text })
+      });
+      if (!res.ok) throw new Error();
+      textEl.value = '';
+      await load();
+    } catch(e) { setSyncStatus('err', 'Guess failed — try again'); }
+    btnEl.disabled = false;
+  }
+
+  async function vote(id) {
+    const prev = myVote;
+    myVote = String(id);
+    localStorage.setItem('oreo_weekend_vote', myVote);
+    const e = entries.find(e => e.id === id);
+    if (!e) return;
+    e.votes = (e.votes || 0) + 1;
+    if (prev && prev !== String(id)) {
+      const p = entries.find(e => String(e.id) === prev);
+      if (p) { p.votes = Math.max(0,(p.votes||0)-1); await fetch(`${ENTRIES_API}?id=eq.${p.id}`, { method:'PATCH', headers:HEADERS, body:JSON.stringify({votes:p.votes}) }); }
+    }
+    render();
+    await fetch(`${ENTRIES_API}?id=eq.${id}`, { method:'PATCH', headers:HEADERS, body:JSON.stringify({votes:e.votes}) });
+    setSyncStatus('ok', 'Vote saved!');
+  }
+
+  async function revealAll() {
+    if (!confirm('Reveal all weekend plans?')) return;
+    revealed = true;
+    await fetch(META_API + '?key=eq.weekend_revealed', { method: 'DELETE', headers: HEADERS });
+    await fetch(META_API, { method: 'POST', headers: HEADERS, body: JSON.stringify({ key: 'weekend_revealed', value: 'true' }) });
+    confetti(); render();
+  }
+
+  async function deleteEntry(id, author) {
+    if (!confirm(`Remove ${author}'s entry?`)) return;
+    await fetch(`${GUESSES_API}?entry_id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+    await fetch(`${ENTRIES_API}?id=eq.${id}`, { method: 'DELETE', headers: HEADERS });
+    await load();
+  }
+
+  async function resetAll() {
+    if (!confirm('Reset ALL entries?')) return;
+    await fetch(GUESSES_API + '?id=gte.0', { method: 'DELETE', headers: HEADERS });
+    await fetch(ENTRIES_API + '?id=gte.0', { method: 'DELETE', headers: HEADERS });
+    await fetch(META_API + '?key=eq.weekend_revealed', { method: 'DELETE', headers: HEADERS });
+    revealed = false; myVote = null;
+    localStorage.removeItem('oreo_weekend_vote');
+    await load();
+  }
+
+  function getWinner() {
+    if (!entries.length) return null;
+    const max = Math.max(...entries.map(e => e.votes||0));
+    if (max === 0) return null;
+    return entries.find(e => e.votes === max);
+  }
+
+  function render() {
+    const winner = getWinner();
+    const banner = document.getElementById('phaseBanner');
+    if (revealed) {
+      banner.className = 'phase-banner reveal';
+      banner.textContent = winner ? `🏆 Best image: ${winner.author} with ${winner.votes} vote${winner.votes!==1?'s':''}!` : '🎭 Plans revealed!';
+    } else {
+      banner.className = 'phase-banner collecting';
+      banner.textContent = '📝 Submit your image and guess the others!';
+    }
+
+    document.getElementById('adminPanel').className = isAdmin ? 'admin-panel visible' : 'admin-panel';
+    document.getElementById('entryCount').textContent = `${entries.length} entr${entries.length===1?'y':'ies'}`;
+
+    const grid = document.getElementById('imagesGrid');
+    if (!entries.length) {
+      grid.innerHTML = '<div class="empty"><div class="big">🌅</div>No entries yet — be the first!</div>';
+      return;
+    }
+
+    const sorted = [...entries].sort((a,b) => (b.votes||0)-(a.votes||0));
+    grid.innerHTML = sorted.map(e => {
+      const isWinner = winner && e.id === winner.id;
+      const isMyVote = myVote === String(e.id);
+      const entryGuesses = guesses.filter(g => g.entry_id === e.id);
+      const delBtn = isAdmin ? `<button class="del-btn" onclick="deleteEntry(${e.id},'${esc(e.author).replace(/'/g,"\\'")}')">✕</button>` : '';
+
+      const guessesList = entryGuesses.length
+        ? entryGuesses.map(g => `<div class="guess-item"><span class="guess-author">${esc(g.guesser_name)}:</span><span class="guess-text">${esc(g.guess_weekend)}</span></div>`).join('')
+        : `<div class="no-guesses">No guesses yet — what do you think?</div>`;
+
+      return `<div class="entry-card${isWinner&&revealed?' winner':''}">
+        <div class="image-wrap">
+          <img src="${esc(e.image_data)}" alt="${esc(e.author)}'s weekend" loading="lazy" />
+        </div>
+        <div class="card-body">
+          <div class="card-author">
+            ${esc(e.author)} ${isWinner&&revealed?'🏆':''}
+          </div>
+          <div class="plan-reveal${revealed?' show':''}">
+            <div class="plan-label">Actual plan</div>
+            ${esc(e.plan)}
+          </div>
+          <div class="card-footer">
+            <button class="vote-btn${isMyVote?' voted':''}" onclick="vote(${e.id})">
+              🍪 <span class="vote-count">${e.votes||0}</span>
+            </button>
+            ${delBtn}
+          </div>
+          <div class="guesses-wrap">
+            <div class="guesses-title">Guesses</div>
+            <div class="guesses-list">${guessesList}</div>
+            <div class="guess-form">
+              <input class="guess-name-input" id="gname-${e.id}" placeholder="Your name" maxlength="25" />
+              <input class="guess-text-input" id="gtext-${e.id}" placeholder="I think..." maxlength="80" />
+              <button class="guess-submit-btn" onclick="submitGuess(${e.id}, this)">Guess →</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    sorted.forEach(e => {
+      const ti = document.getElementById(`gtext-${e.id}`);
+      if (ti) ti.addEventListener('keydown', ev => { if(ev.key==='Enter'){ev.preventDefault(); ti.nextElementSibling&&ti.nextElementSibling.click();} });
+    });
+  }
+
+  function handleAdminToggle() {
+    if (isAdmin) { lockAdmin(); return; }
+    document.getElementById('pwInput').value = '';
+    document.getElementById('lockErr').textContent = '';
+    document.getElementById('lockOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('pwInput').focus(), 50);
+  }
+  function tryUnlock() {
+    if (document.getElementById('pwInput').value === ADMIN_PASSWORD) {
+      isAdmin = true; closeLock();
+      document.getElementById('adminBtn').classList.add('active');
+      document.getElementById('lockIcon').textContent = '🔓';
+      document.getElementById('adminLabel').textContent = 'Admin on';
+      render();
+    } else { document.getElementById('lockErr').textContent = 'Wrong password.'; document.getElementById('pwInput').select(); }
+  }
+  function lockAdmin() {
+    isAdmin = false;
+    document.getElementById('adminBtn').classList.remove('active');
+    document.getElementById('lockIcon').textContent = '🔒';
+    document.getElementById('adminLabel').textContent = 'Admin';
+    render();
+  }
+  function closeLock() { document.getElementById('lockOverlay').classList.remove('open'); }
+
+  function confetti() {
+    const wrap = document.getElementById('confettiWrap');
+    const colors = ['#7c5cfc','#f5c842','#3ecf8e','#f26b6b','#6ab0f5','#f5b86a'];
+    for (let i = 0; i < 50; i++) {
+      const el = document.createElement('div');
+      el.className = 'confetto';
+      const size = 5 + Math.random() * 8;
+      el.style.cssText = `left:${Math.random()*100}%;top:-12px;width:${size}px;height:${size}px;background:${colors[Math.floor(Math.random()*colors.length)]};border-radius:${Math.random()>.5?'50%':'2px'};animation-duration:${1+Math.random()*1.2}s;animation-delay:${Math.random()*0.5}s;`;
+      wrap.appendChild(el);
+      el.addEventListener('animationend', () => el.remove());
+    }
+  }
+
+  document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') tryUnlock(); });
+  document.getElementById('lockOverlay').addEventListener('click', e => { if(e.target===document.getElementById('lockOverlay')) closeLock(); });
+
+  load();
+  setInterval(load, 8000);
+</script>
+</body>
+</html>
