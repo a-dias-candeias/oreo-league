@@ -184,9 +184,9 @@
     <div class="how-to-title">How to play</div>
     <div class="steps">
       <div class="step"><span class="step-num">1.</span> Think of something you're doing this weekend</div>
-      <div class="step"><span class="step-num">2.</span> Go to ChatGPT, Claude, or any AI image tool and generate an image of it — be creative with the prompt!</div>
+      <div class="step"><span class="step-num">2.</span> Go to ChatGPT, DALL-E, or any AI image tool and generate an image of it — be creative with the prompt!</div>
       <div class="step"><span class="step-num">3.</span> Save the image and upload it below along with your actual plan (hidden until the end)</div>
-      <div class="step"><span class="step-num">4.</span> Everyone guesses what you're doing based on the image (and the name) 👇</div>
+      <div class="step"><span class="step-num">4.</span> Everyone guesses what you're doing based on the image 👇</div>
     </div>
   </div>
 
@@ -272,20 +272,31 @@
   function handleFileSelect(input) {
     const file = input.files[0];
     if (!file) return;
-    if (file.size > 2 * 1024 * 1024) {
-      document.getElementById('formErr').textContent = 'Image too large — please use an image under 2MB.';
+    if (file.size > 10 * 1024 * 1024) {
+      document.getElementById('formErr').textContent = 'Image too large — please use an image under 10MB.';
       document.getElementById('formErr').classList.add('show');
       return;
     }
+    document.getElementById('formErr').classList.remove('show');
     const reader = new FileReader();
     reader.onload = (e) => {
-      selectedImageBase64 = e.target.result;
-      const preview = document.getElementById('previewImg');
-      preview.src = selectedImageBase64;
-      preview.classList.add('show');
-      document.getElementById('uploadLabel').style.display = 'none';
-      document.getElementById('uploadArea').classList.add('has-image');
-      document.getElementById('formErr').classList.remove('show');
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        const MAX = 900;
+        let w = img.width, h = img.height;
+        if (w > h && w > MAX) { h = Math.round(h * MAX / w); w = MAX; }
+        else if (h > MAX) { w = Math.round(w * MAX / h); h = MAX; }
+        canvas.width = w; canvas.height = h;
+        canvas.getContext('2d').drawImage(img, 0, 0, w, h);
+        selectedImageBase64 = canvas.toDataURL('image/jpeg', 0.82);
+        const preview = document.getElementById('previewImg');
+        preview.src = selectedImageBase64;
+        preview.classList.add('show');
+        document.getElementById('uploadLabel').style.display = 'none';
+        document.getElementById('uploadArea').classList.add('has-image');
+      };
+      img.src = e.target.result;
     };
     reader.readAsDataURL(file);
   }
@@ -449,13 +460,16 @@
         ? entryGuesses.map(g => `<div class="guess-item"><span class="guess-author">${esc(g.guesser_name)}:</span><span class="guess-text">${esc(g.guess_weekend)}</span></div>`).join('')
         : `<div class="no-guesses">No guesses yet — what do you think?</div>`;
 
+      const adminHint = isAdmin ? `<div style="font-size:11px;color:var(--muted);margin-bottom:8px;padding:5px 8px;background:var(--surface);border-radius:6px;border:1px solid var(--border);">by ${esc(e.author)} · ${esc(e.plan)}</div>` : '';
+
       return `<div class="entry-card${isWinner&&revealed?' winner':''}">
         <div class="image-wrap">
-          <img src="${esc(e.image_data)}" alt="${esc(e.author)}'s weekend" loading="lazy" />
+          <img src="${esc(e.image_data)}" alt="mystery weekend" loading="lazy" />
         </div>
         <div class="card-body">
-          <div class="card-author">
-            ${esc(e.author)} ${isWinner&&revealed?'🏆':''}
+          ${adminHint}
+          <div class="card-author${revealed?'':' hidden-author'}">
+            ${revealed ? `${esc(e.author)} ${isWinner?'🏆':''}` : `<span style="color:var(--muted);font-size:13px;font-weight:400;">🕵️ Who is this?</span>`}
           </div>
           <div class="plan-reveal${revealed?' show':''}">
             <div class="plan-label">Actual plan</div>
@@ -472,7 +486,7 @@
             <div class="guesses-list">${guessesList}</div>
             <div class="guess-form">
               <input class="guess-name-input" id="gname-${e.id}" placeholder="Your name" maxlength="25" />
-              <input class="guess-text-input" id="gtext-${e.id}" placeholder="I think..." maxlength="80" />
+              <input class="guess-text-input" id="gtext-${e.id}" placeholder="Who & what? e.g. Loureiro hiking" maxlength="80" />
               <button class="guess-submit-btn" onclick="submitGuess(${e.id}, this)">Guess →</button>
             </div>
           </div>
